@@ -1,4 +1,4 @@
-#include "npole.h"
+#include <comdef.h>
 
 #include <stdio.h>
 #include <string.h>
