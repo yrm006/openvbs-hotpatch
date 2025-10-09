@@ -10,7 +10,7 @@ This project was forked from [OpenVBS](https://github.com/yrm006/openvbs). Pleas
 
 [Windows]
 
-x64 Native Tools Command Prompt for VS 2020
+x64 Native Tools Command Prompt for VS 2022
 
     > nmake
 
