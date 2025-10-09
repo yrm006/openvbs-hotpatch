@@ -23,6 +23,9 @@ Test:
     > sample.exe
 
 ## Usage
+
+[C#]
+
 ```C#
     var engine = (IActiveScript)Activator.CreateInstance( Type.GetTypeFromProgID("OpenVBS") );
 
