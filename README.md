@@ -18,9 +18,13 @@ As Administrator:
 
     > regsvr32 openvbs.dll
 
-Test:
+Test for .NET:
 
     > sample.exe
+
+Test for CScript:
+
+    > cscript //e:openvbs your_script.vbs
 
 ## Usage
 
