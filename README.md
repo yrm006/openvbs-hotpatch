@@ -32,7 +32,7 @@ Test for .NET (no-need regsvr32):
 
 ## Usage
 
-[C#]
+[sample.cs]
 
 ```C#
     var engine = (IActiveScript)Activator.CreateInstance( Type.GetTypeFromProgID("OpenVBS") );
@@ -56,7 +56,7 @@ Test for .NET (no-need regsvr32):
     engine.SetScriptState(SCRIPTSTATE.STARTED);
 ```
 
-[C# (RegSvr32-Free)]
+[sample-regfree.cs]
 
 ```C#
     var engine = (IActiveScript)RegFree.CreateInstance("openvbs.dll", new Guid("{23ADC41D-068C-4D0B-B3F6-0792F675E1B6}"));
