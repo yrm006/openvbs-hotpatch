@@ -1,7 +1,7 @@
 OpenVBS - HotPatch Edition
 ====
 
-OpenVBS is a replacement engine for VBScript. You can continue to use your existing VBScript code simply by registering openvbs.dll with regsvr32.
+OpenVBS is a replacement engine for VBScript. You can continue to use your existing VBScript code simply.
 
 ## Description
 This project was forked from [OpenVBS](https://github.com/yrm006/openvbs). Please refer to their documentation for more details.
@@ -14,11 +14,11 @@ x64 Native Tools Command Prompt for VS 2022
 
     > nmake
 
-As Administrator:
+regist the dll as Administrator (if you need):
 
     > regsvr32 openvbs.dll
 
-Test for CScript:
+Test for CScript (need regsvr32):
 
     > cscript //e:openvbs your_script.vbs
 
@@ -26,7 +26,7 @@ Test for .NET (need regsvr32):
 
     > sample.exe
 
-Test for .NET (without regsvr32):
+Test for .NET (no-need regsvr32):
 
     > sample-regfree.exe
 
