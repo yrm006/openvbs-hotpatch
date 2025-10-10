@@ -1,5 +1,5 @@
 
-all: openvbs.dll sample.exe
+all: openvbs.dll sample.exe sample-regfree.exe
 	@echo DONE
 
 openvbs.dll:
@@ -9,5 +9,8 @@ openvbs.dll:
 sample.exe:
 	csc sample.cs
 
+sample-regfree.exe:
+	csc sample-regfree.cs
+
 clean:
-	del openvbs.dll sample.exe
+	del openvbs.dll sample.exe sample-regfree.exe

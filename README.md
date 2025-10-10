@@ -18,13 +18,17 @@ As Administrator:
 
     > regsvr32 openvbs.dll
 
-Test for .NET:
-
-    > sample.exe
-
 Test for CScript:
 
     > cscript //e:openvbs your_script.vbs
+
+Test for .NET (need regsvr32):
+
+    > sample.exe
+
+Test for .NET (without regsvr32):
+
+    > sample-regfree.exe
 
 ## Usage
 
@@ -50,6 +54,14 @@ Test for CScript:
     ((IActiveScriptParse)engine).ParseScriptText(script, null, null, null, 0, 0, 0, out result, IntPtr.Zero);
 
     engine.SetScriptState(SCRIPTSTATE.STARTED);
+```
+
+[C# (RegSvr32-Free)]
+
+```C#
+    var engine = (IActiveScript)RegFree.CreateInstance("openvbs.dll", new Guid("{23ADC41D-068C-4D0B-B3F6-0792F675E1B6}"));
+
+    // ...
 ```
 
 ## Author
