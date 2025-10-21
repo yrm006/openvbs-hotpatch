@@ -3,7 +3,7 @@ all: openvbs.dll sample.exe sample-regfree.exe
 	@echo DONE
 
 openvbs.dll:
-	cl /Ox /EHa /D_CRT_STDIO_ISO_WIDE_SPECIFIERS openvbs.cpp jujube.cpp /link /DLL /OUT:openvbs.dll /DEF:openvbs.def advapi32.lib Ole32.lib
+	cl /Ox /EHa /D_CRT_STDIO_ISO_WIDE_SPECIFIERS openvbs.cpp jujube.cpp /link /OPT:NOICF /DLL /OUT:openvbs.dll /DEF:openvbs.def advapi32.lib Ole32.lib
 	del *.obj *.lib *.exp
 
 sample.exe:
