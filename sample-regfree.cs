@@ -89,7 +89,7 @@ public interface IActiveScript
 }
 
 [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("C7EF7658-E1EE-480E-97EA-D52CB4D76D17")]
-public interface IActiveScriptParse
+public interface IActiveScriptParse64
 {
     void InitNew();
     void AddScriptlet(
@@ -99,7 +99,7 @@ public interface IActiveScriptParse
         [MarshalAs(UnmanagedType.LPWStr)] string subItemName,
         [MarshalAs(UnmanagedType.LPWStr)] string eventName,
         [MarshalAs(UnmanagedType.LPWStr)] string delimiter,
-        uint sourceContextCookie,
+        ulong sourceContextCookie,
         uint startingLineNumber,
         uint flags,
         [MarshalAs(UnmanagedType.LPWStr)] out string name,
@@ -109,7 +109,7 @@ public interface IActiveScriptParse
         [MarshalAs(UnmanagedType.LPWStr)] string itemName,
         [MarshalAs(UnmanagedType.Interface)] object punkContext,
         [MarshalAs(UnmanagedType.LPWStr)] string delimiter,
-        uint sourceContextCookie,
+        ulong sourceContextCookie,
         uint startingLineNumber,
         uint flags,
         [MarshalAs(UnmanagedType.Interface)] out object result,
@@ -193,7 +193,7 @@ public static class Sample{
     public static void Main(){
         var engine = (IActiveScript)RegFree.CreateInstance("openvbs.dll", new Guid("{23ADC41D-068C-4D0B-B3F6-0792F675E1B6}"));
 
-        ((IActiveScriptParse)engine).InitNew();
+        ((IActiveScriptParse64)engine).InitNew();
 
         var site = new Site();
         engine.SetScriptSite(site);
@@ -207,7 +207,7 @@ public static class Sample{
             "bridge.Log \"Add returned: \" & total";
 
         object result = null;
-        ((IActiveScriptParse)engine).ParseScriptText(script, null, null, null, 0UL, 0, 0, out result, IntPtr.Zero);
+        ((IActiveScriptParse64)engine).ParseScriptText(script, null, null, null, 0, 0, 0, out result, IntPtr.Zero);
 
         engine.SetScriptState(SCRIPTSTATE.STARTED);
     }
