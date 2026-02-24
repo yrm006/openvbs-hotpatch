@@ -156,7 +156,7 @@ public static class Sample{
             "bridge.Log \"Add returned: \" & total";
 
         object result = null;
-        ((IActiveScriptParse64)engine).ParseScriptText(script, null, null, null, 0, 0, 0, out result, IntPtr.Zero);
+        ((IActiveScriptParse64)engine).ParseScriptText(script, null, null, null, 0UL, 0, 0, out result, IntPtr.Zero);
 
         engine.SetScriptState(SCRIPTSTATE.STARTED);
     }
