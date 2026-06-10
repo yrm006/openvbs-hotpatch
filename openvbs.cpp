@@ -1487,24 +1487,30 @@ public:
         int n = pv5->llVal;
         int (*cmp)(const wchar_t*, const wchar_t*, size_t) = (pv6->llVal) ? _wcsnicmp : std::wcsncmp;
 
-        std::wstring rs;
-
         int lt = SysStringLen(tgt);
-        int e = SysStringLen(src)-lt;
-        int i = s-1;
-        while( i <= e ){
-            if(n && cmp(src+i, tgt, lt) == 0){
-                rs += rpl;
-                i += lt;
-                n -= (n < 0) ? 0 : 1;
-            }else{
-                rs += src[i];
-                i += 1;
-            }
-        }
+        if(0 < lt){
+            std::wstring rs;
 
-        pVarResult->vt = VT_BSTR;
-        pVarResult->bstrVal = SysAllocString(rs.c_str());
+            int e = SysStringLen(src)-lt;
+            int i = s-1;
+            while( i <= e ){
+                if(n && cmp(src+i, tgt, lt) == 0){
+                    rs += rpl;
+                    i += lt;
+                    n -= (n < 0) ? 0 : 1;
+                }else{
+                    rs += src[i];
+                    i += 1;
+                }
+            }
+            rs += src+i;
+
+            pVarResult->vt = VT_BSTR;
+            pVarResult->bstrVal = SysAllocString(rs.c_str());
+        }else{
+            pVarResult->vt = VT_BSTR;
+            pVarResult->bstrVal = SysAllocString(src);
+        }
 
         return S_OK;
     }
