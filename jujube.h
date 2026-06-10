@@ -2582,10 +2582,71 @@ private:
         VARIANT* pvL = p-1;
         VARIANT* pvR = p+1;
 
-        if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
-        if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+        _variant_t v;
 
-        _variant_t v( VarCmp(pvL, pvR, 0, 0) == VARCMP_LT );
+        if(
+            ( pvL->vt == VT_I1 || pvR->vt == VT_I1 ) ||
+            ( pvL->vt == VT_I2 || pvR->vt == VT_I2 ) ||
+            ( pvL->vt == VT_I4 || pvR->vt == VT_I4 ) ||
+            ( pvL->vt == VT_I8 || pvR->vt == VT_I8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_I8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_I8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT);
+        }else
+        if(
+            ( pvL->vt == VT_UI1 || pvR->vt == VT_UI1 ) ||
+            ( pvL->vt == VT_UI2 || pvR->vt == VT_UI2 ) ||
+            ( pvL->vt == VT_UI4 || pvR->vt == VT_UI4 ) ||
+            ( pvL->vt == VT_UI8 || pvR->vt == VT_UI8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_UI8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_UI8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT);
+        }else
+        if(pvL->vt == VT_R8 || pvR->vt == VT_R8){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_R8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_R8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT);
+        }else
+        if(pvL->vt == VT_BSTR || pvR->vt == VT_BSTR){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_BSTR)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_BSTR)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT);
+        }else
+        {
+            if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
+            if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+            v = ( VarCmp(pvL, pvR, 0, 0) == VARCMP_LT );
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2598,10 +2659,71 @@ private:
         VARIANT* pvL = p-1;
         VARIANT* pvR = p+1;
 
-        if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
-        if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+        _variant_t v;
 
-        _variant_t v( VarCmp(pvL, pvR, 0, 0) == VARCMP_GT );
+        if(
+            ( pvL->vt == VT_I1 || pvR->vt == VT_I1 ) ||
+            ( pvL->vt == VT_I2 || pvR->vt == VT_I2 ) ||
+            ( pvL->vt == VT_I4 || pvR->vt == VT_I4 ) ||
+            ( pvL->vt == VT_I8 || pvR->vt == VT_I8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_I8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_I8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT);
+        }else
+        if(
+            ( pvL->vt == VT_UI1 || pvR->vt == VT_UI1 ) ||
+            ( pvL->vt == VT_UI2 || pvR->vt == VT_UI2 ) ||
+            ( pvL->vt == VT_UI4 || pvR->vt == VT_UI4 ) ||
+            ( pvL->vt == VT_UI8 || pvR->vt == VT_UI8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_UI8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_UI8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT);
+        }else
+        if(pvL->vt == VT_R8 || pvR->vt == VT_R8){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_R8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_R8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT);
+        }else
+        if(pvL->vt == VT_BSTR || pvR->vt == VT_BSTR){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_BSTR)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_BSTR)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT);
+        }else
+        {
+            if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
+            if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+            v = ( VarCmp(pvL, pvR, 0, 0) == VARCMP_GT );
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2614,10 +2736,71 @@ private:
         VARIANT* pvL = p-1;
         VARIANT* pvR = p+1;
 
-        if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
-        if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+        _variant_t v;
 
-        _variant_t v( VarCmp(pvL, pvR, 0, 0) == VARCMP_LT || VarCmp(pvL, pvR, 0, 0) == VARCMP_EQ );
+        if(
+            ( pvL->vt == VT_I1 || pvR->vt == VT_I1 ) ||
+            ( pvL->vt == VT_I2 || pvR->vt == VT_I2 ) ||
+            ( pvL->vt == VT_I4 || pvR->vt == VT_I4 ) ||
+            ( pvL->vt == VT_I8 || pvR->vt == VT_I8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_I8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_I8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(
+            ( pvL->vt == VT_UI1 || pvR->vt == VT_UI1 ) ||
+            ( pvL->vt == VT_UI2 || pvR->vt == VT_UI2 ) ||
+            ( pvL->vt == VT_UI4 || pvR->vt == VT_UI4 ) ||
+            ( pvL->vt == VT_UI8 || pvR->vt == VT_UI8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_UI8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_UI8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_R8 || pvR->vt == VT_R8){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_R8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_R8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_BSTR || pvR->vt == VT_BSTR){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_BSTR)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_BSTR)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_LT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        {
+            if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
+            if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+            v = ( VarCmp(pvL, pvR, 0, 0) == VARCMP_LT || VarCmp(pvL, pvR, 0, 0) == VARCMP_EQ );
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2630,10 +2813,71 @@ private:
         VARIANT* pvL = p-1;
         VARIANT* pvR = p+1;
 
-        if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
-        if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+        _variant_t v;
 
-        _variant_t v( VarCmp(pvL, pvR, 0, 0) == VARCMP_GT || VarCmp(pvL, pvR, 0, 0) == VARCMP_EQ );
+        if(
+            ( pvL->vt == VT_I1 || pvR->vt == VT_I1 ) ||
+            ( pvL->vt == VT_I2 || pvR->vt == VT_I2 ) ||
+            ( pvL->vt == VT_I4 || pvR->vt == VT_I4 ) ||
+            ( pvL->vt == VT_I8 || pvR->vt == VT_I8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_I8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_I8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(
+            ( pvL->vt == VT_UI1 || pvR->vt == VT_UI1 ) ||
+            ( pvL->vt == VT_UI2 || pvR->vt == VT_UI2 ) ||
+            ( pvL->vt == VT_UI4 || pvR->vt == VT_UI4 ) ||
+            ( pvL->vt == VT_UI8 || pvR->vt == VT_UI8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_UI8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_UI8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_R8 || pvR->vt == VT_R8){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_R8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_R8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_BSTR || pvR->vt == VT_BSTR){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_BSTR)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_BSTR)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_GT || VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        {
+            if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
+            if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+            v = ( VarCmp(pvL, pvR, 0, 0) == VARCMP_GT || VarCmp(pvL, pvR, 0, 0) == VARCMP_EQ );
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2646,10 +2890,71 @@ private:
         VARIANT* pvL = p-1;
         VARIANT* pvR = p+1;
 
-        if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
-        if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+        _variant_t v;
 
-        _variant_t v( VarCmp(pvL, pvR, 0, 0) != VARCMP_EQ );
+        if(
+            ( pvL->vt == VT_I1 || pvR->vt == VT_I1 ) ||
+            ( pvL->vt == VT_I2 || pvR->vt == VT_I2 ) ||
+            ( pvL->vt == VT_I4 || pvR->vt == VT_I4 ) ||
+            ( pvL->vt == VT_I8 || pvR->vt == VT_I8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_I8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_I8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) != VARCMP_EQ);
+        }else
+        if(
+            ( pvL->vt == VT_UI1 || pvR->vt == VT_UI1 ) ||
+            ( pvL->vt == VT_UI2 || pvR->vt == VT_UI2 ) ||
+            ( pvL->vt == VT_UI4 || pvR->vt == VT_UI4 ) ||
+            ( pvL->vt == VT_UI8 || pvR->vt == VT_UI8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_UI8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_UI8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) != VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_R8 || pvR->vt == VT_R8){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_R8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_R8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) != VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_BSTR || pvR->vt == VT_BSTR){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_BSTR)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_BSTR)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) != VARCMP_EQ);
+        }else
+        {
+            if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
+            if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+            v = ( VarCmp(pvL, pvR, 0, 0) != VARCMP_EQ );
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2662,10 +2967,71 @@ private:
         VARIANT* pvL = p-1;
         VARIANT* pvR = p+1;
 
-        if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
-        if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+        _variant_t v;
 
-        _variant_t v( VarCmp(pvL, pvR, 0, 0) == VARCMP_EQ );
+        if(
+            ( pvL->vt == VT_I1 || pvR->vt == VT_I1 ) ||
+            ( pvL->vt == VT_I2 || pvR->vt == VT_I2 ) ||
+            ( pvL->vt == VT_I4 || pvR->vt == VT_I4 ) ||
+            ( pvL->vt == VT_I8 || pvR->vt == VT_I8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_I8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_I8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(
+            ( pvL->vt == VT_UI1 || pvR->vt == VT_UI1 ) ||
+            ( pvL->vt == VT_UI2 || pvR->vt == VT_UI2 ) ||
+            ( pvL->vt == VT_UI4 || pvR->vt == VT_UI4 ) ||
+            ( pvL->vt == VT_UI8 || pvR->vt == VT_UI8 ) ||
+        0){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_UI8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_UI8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_R8 || pvR->vt == VT_R8){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_R8)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_R8)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        if(pvL->vt == VT_BSTR || pvR->vt == VT_BSTR){
+            _variant_t vL, vR;
+            if(
+                FAILED(m_err->m_hr = VariantChangeType(&vL, pvL, 0, VT_BSTR)) ||
+                FAILED(m_err->m_hr = VariantChangeType(&vR, pvR, 0, VT_BSTR)) ||
+            0){
+                m_mode = &CProcessor::clock_throw_;
+                --m_pc;
+                return false;
+            }
+            v = (VarCmp(&vL, &vR, 0, 0) == VARCMP_EQ);
+        }else
+        {
+            if(pvL->vt == (VT_BYREF|VT_VARIANT)) pvL = pvL->pvarVal;
+            if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
+            v = ( VarCmp(pvL, pvR, 0, 0) == VARCMP_EQ );
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -4103,6 +4469,11 @@ private:
             m_err->wCode = 11;
             SysFreeString(m_err->bstrSource); m_err->bstrSource = SysAllocString(NAME);
             SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Div by 0");
+        }else
+        if(m_err->m_hr == DISP_E_TYPEMISMATCH){
+            m_err->wCode = 12;
+            SysFreeString(m_err->bstrSource); m_err->bstrSource = SysAllocString(NAME);
+            SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Type mismatch");
         }else
         if(!m_err->wCode){
             m_err->wCode = 51;
