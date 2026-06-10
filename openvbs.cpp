@@ -1066,6 +1066,9 @@ public:
         if( SUCCEEDED( hr = VariantChangeType(&v, pv1, 0, VT_R8) ) ){
             pVarResult->vt = VT_R8;
             pVarResult->dblVal = std::exp(v.dblVal);
+            if(isinf(pVarResult->dblVal)){
+                return CTL_E_OVERFLOW;
+            }
             return S_OK;
         }
         
@@ -1081,7 +1084,10 @@ public:
         VARIANT* pv1 = (0 <= an-1) ? &pDispParams->rgvarg[an-1] : &vd1;
         if(pv1->vt == (VT_BYREF|VT_VARIANT)) pv1 = pv1->pvarVal;
 
-        if(!( pv1->vt==VT_BSTR )) return E_INVALIDARG;
+        _variant_t v1;{
+            VariantChangeType(&v1, pv1, 0, VT_BSTR);
+            pv1 = &v1;
+        }
 
         pVarResult->vt = VT_I8;
         pVarResult->llVal = SysStringLen(pv1->bstrVal);
@@ -1101,8 +1107,12 @@ public:
         VARIANT* pv2 = (0 <= an-2) ? &pDispParams->rgvarg[an-2] : &vd2;
         if(pv2->vt == (VT_BYREF|VT_VARIANT)) pv2 = pv2->pvarVal;
 
-        if(!( pv1->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv2->vt==VT_I8   )) return E_INVALIDARG;
+        _variant_t v1, v2;{
+            VariantChangeType(&v1, pv1, 0, VT_BSTR);
+            VariantChangeType(&v2, pv2, 0, VT_I8);
+            pv1 = &v1;
+            pv2 = &v2;
+        }
 
         UINT pos = 0;
         if(SysStringLen(pv1->bstrVal) < pos) pos = 0;
@@ -1127,8 +1137,12 @@ public:
         VARIANT* pv2 = (0 <= an-2) ? &pDispParams->rgvarg[an-2] : &vd2;
         if(pv2->vt == (VT_BYREF|VT_VARIANT)) pv2 = pv2->pvarVal;
 
-        if(!( pv1->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv2->vt==VT_I8   )) return E_INVALIDARG;
+        _variant_t v1, v2;{
+            VariantChangeType(&v1, pv1, 0, VT_BSTR);
+            VariantChangeType(&v2, pv2, 0, VT_I8);
+            pv1 = &v1;
+            pv2 = &v2;
+        }
 
         UINT pos = SysStringLen(pv1->bstrVal) - pv2->llVal;
         if(SysStringLen(pv1->bstrVal) < pos) pos = 0;
@@ -1156,9 +1170,14 @@ public:
         VARIANT* pv3 = (0 <= an-3) ? &pDispParams->rgvarg[an-3] : &vd3;
         if(pv3->vt == (VT_BYREF|VT_VARIANT)) pv3 = pv3->pvarVal;
 
-        if(!( pv1->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv2->vt==VT_I8   )) return E_INVALIDARG;
-        if(!( pv3->vt==VT_I8   )) return E_INVALIDARG;
+        _variant_t v1, v2, v3;{
+            VariantChangeType(&v1, pv1, 0, VT_BSTR);
+            VariantChangeType(&v2, pv2, 0, VT_I8);
+            VariantChangeType(&v3, pv3, 0, VT_I8);
+            pv1 = &v1;
+            pv2 = &v2;
+            pv3 = &v3;
+        }
 
         UINT pos = pv2->llVal-1;
         if(SysStringLen(pv1->bstrVal) < pos) pos = SysStringLen(pv1->bstrVal);
@@ -1327,10 +1346,16 @@ public:
             pv4 = &vd4;
         }
 
-        if(!( pv1->vt==VT_I8   )) return E_INVALIDARG;
-        if(!( pv2->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv3->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv4->vt==VT_I8   )) return E_INVALIDARG;
+        _variant_t v1, v2, v3, v4;{
+            VariantChangeType(&v1, pv1, 0, VT_I8);
+            VariantChangeType(&v2, pv2, 0, VT_BSTR);
+            VariantChangeType(&v3, pv3, 0, VT_BSTR);
+            VariantChangeType(&v4, pv4, 0, VT_I8);
+            pv1 = &v1;
+            pv2 = &v2;
+            pv3 = &v3;
+            pv4 = &v4;
+        }
 
         int l = SysStringLen(pv3->bstrVal);
         int e = SysStringLen(pv2->bstrVal)-l;
@@ -1367,10 +1392,16 @@ public:
         VARIANT* pv4 = (0 <= an-4) ? &pDispParams->rgvarg[an-4] : &vd4;
         if(pv4->vt == (VT_BYREF|VT_VARIANT)) pv4 = pv4->pvarVal;
 
-        if(!( pv1->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv2->vt==VT_BSTR )) return E_INVALIDARG;
-        if(!( pv3->vt==VT_I8   )) return E_INVALIDARG;
-        if(!( pv4->vt==VT_I8   )) return E_INVALIDARG;
+        _variant_t v1, v2, v3, v4;{
+            VariantChangeType(&v1, pv1, 0, VT_BSTR);
+            VariantChangeType(&v2, pv2, 0, VT_BSTR);
+            VariantChangeType(&v3, pv3, 0, VT_I8);
+            VariantChangeType(&v4, pv4, 0, VT_I8);
+            pv1 = &v1;
+            pv2 = &v2;
+            pv3 = &v3;
+            pv4 = &v4;
+        }
 
         int l = SysStringLen(pv2->bstrVal);
         int e = 0;

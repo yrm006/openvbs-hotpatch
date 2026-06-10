@@ -2366,7 +2366,11 @@ private:
 
         _variant_t v0(0LL);
         _variant_t v;
-        VarAdd(&v0, pvR, &v);
+        if( FAILED(m_err->m_hr = VarAdd(&v0, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-1 < &m_s.back()) m_s.pop_back();
 
@@ -2383,7 +2387,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v;
-        VarAdd(pvL, pvR, &v);
+        if( FAILED(m_err->m_hr = VarAdd(pvL, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2399,7 +2407,11 @@ private:
 
         _variant_t v0(0LL);
         _variant_t v;
-        VarSub(&v0, pvR, &v);
+        if( FAILED(m_err->m_hr = VarSub(&v0, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-1 < &m_s.back()) m_s.pop_back();
 
@@ -2416,7 +2428,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v;
-        VarSub(pvL, pvR, &v);
+        if( FAILED(m_err->m_hr = VarSub(pvL, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2433,7 +2449,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v;
-        VarPow(pvL, pvR, &v);
+        if( FAILED(m_err->m_hr = VarPow(pvL, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2450,7 +2470,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v;
-        VarMul(pvL, pvR, &v);
+        if( FAILED(m_err->m_hr = VarMul(pvL, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2488,7 +2512,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v;
-        VarMod(pvL, pvR, &v);
+        if( FAILED(m_err->m_hr = VarMod(pvL, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2505,7 +2533,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v;
-        VarCat(pvL, pvR, &v);
+        if( FAILED(m_err->m_hr = VarCat(pvL, pvR, &v)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2520,7 +2552,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v1(1LL);
-        VarAdd(pvR, &v1, pvR);
+        if( FAILED(m_err->m_hr = VarAdd(pvR, &v1, pvR)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-1 < &m_s.back()) m_s.pop_back();
 
@@ -2537,7 +2573,11 @@ private:
         _variant_t v(*pvL);
 
         _variant_t v1(1LL);
-        VarAdd(pvL, &v1, pvL);
+        if( FAILED(m_err->m_hr = VarAdd(pvL, &v1, pvL)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -2552,7 +2592,11 @@ private:
         if(pvR->vt == (VT_BYREF|VT_VARIANT)) pvR = pvR->pvarVal;
 
         _variant_t v1(1LL);
-        VarSub(pvR, &v1, pvR);
+        if( FAILED(m_err->m_hr = VarSub(pvR, &v1, pvR)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-1 < &m_s.back()) m_s.pop_back();
 
@@ -2569,7 +2613,11 @@ private:
         _variant_t v(*pvL);
 
         _variant_t v1(1LL);
-        VarSub(pvL, &v1, pvL);
+        if( FAILED(m_err->m_hr = VarSub(pvL, &v1, pvL)) ){
+            m_mode = &CProcessor::clock_throw_;
+            --m_pc;
+            return false;
+        }
 
         while(p-2 < &m_s.back()) m_s.pop_back();
 
@@ -4433,6 +4481,11 @@ private:
             SysFreeString(m_err->bstrSource); m_err->bstrSource = SysAllocString(NAME);
             SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Invalid argument");
         }else
+        if(m_err->m_hr == CTL_E_OVERFLOW){
+            m_err->wCode = 6;
+            SysFreeString(m_err->bstrSource); m_err->bstrSource = SysAllocString(NAME);
+            SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Overflow");
+        }else
         if(!m_err->wCode){
             m_err->wCode = 51;
             SysFreeString(m_err->bstrSource); m_err->bstrSource = SysAllocString(NAME);
@@ -4471,7 +4524,7 @@ private:
             SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Div by 0");
         }else
         if(m_err->m_hr == DISP_E_TYPEMISMATCH){
-            m_err->wCode = 12;
+            m_err->wCode = 13;
             SysFreeString(m_err->bstrSource); m_err->bstrSource = SysAllocString(NAME);
             SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Type mismatch");
         }else
