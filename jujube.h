@@ -4982,10 +4982,13 @@ private:
         auto i = m_s.rbegin();
         while(!( i->wReserved1 == VTX_GROUND || i->wReserved1 == VTX_INST )) ++i;
 
-        if(i->wReserved1 == VTX_INST && *((inst_t*)i->byref) == &CProcessor::op_invoke && ni<2){
+        bool prR = ( *((word_m*)m_pp->m_code[m_pc-2].p) == &CProcessor::word_parenR );
+        bool ist = m_s.rbegin()->wReserved1;
+
+        if(i->wReserved1 == VTX_INST && *((inst_t*)i->byref) == &CProcessor::op_invoke && ni<2 && (prR || ist)){
             i->byref = (void*)&s_insts[INST_op_invoke_put];//&CProcessor::op_invoke_put;
         }else
-        if(i->wReserved1 == VTX_INST && *((inst_t*)i->byref) == &CProcessor::op_array && ni<2){
+        if(i->wReserved1 == VTX_INST && *((inst_t*)i->byref) == &CProcessor::op_array && ni<2 && prR){
             i->byref = (void*)&s_insts[INST_op_array_put];//&CProcessor::op_array_put;
         }else
         {
