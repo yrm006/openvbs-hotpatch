@@ -10,7 +10,7 @@ This project was forked from [OpenVBS](https://github.com/yrm006/openvbs). Pleas
 
 [Windows]
 
-x64 Native Tools Command Prompt for VS 2022
+x64/x86 Native Tools Command Prompt for VS 2022
 
     > nmake
 
@@ -68,4 +68,4 @@ Test for .NET (no-need regsvr32):
 [NaturalStyle PREMIUM](https://p.na-s.jp)
 
 ---
-yrm.20251009
+yrm.20260901
