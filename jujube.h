@@ -6513,8 +6513,8 @@ public:
         //, m_pgadims()
         , m_mode(&CProcessor::clock_)
         //---
-        , m_err(new Error(), false)
 		, m_pstop(pstop)
+        , m_err(new Error(), false)
     {
         m_scope.reserve(size);
         m_scope.push_back( m_pp->m_dim_defs );
@@ -6551,8 +6551,8 @@ public:
         //, m_pgadims()
         , m_mode(&CProcessor::clock_)
         //---
-        , m_err(new Error(), false)
 		, m_pstop(parent.m_pstop)
+        , m_err(new Error(), false)
     {
         m_scope.reserve(parent.m_scope.capacity());
         m_scope.push_back( m_pp->m_dim_defs );
@@ -6595,8 +6595,8 @@ public:
         //, m_pgadims()
         , m_mode(&CProcessor::clock_)
         //---
-        , m_err(new Error(), false)
 		, m_pstop(source.m_pstop)
+        , m_err(new Error(), false)
     {
         m_scope.reserve(source.m_scope.capacity());
         m_scope.push_back( {} );
