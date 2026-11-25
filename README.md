@@ -22,6 +22,13 @@ Test for CScript (need regsvr32):
 
     > cscript //e:openvbs your_script.vbs
 
+Test for ASP (need regsvr32 and IIS execution-privileges):
+
+    <%@ Language="OpenVBS" %>
+    <%
+      Response.Write "this is openvbs."
+    %>
+
 Test for .NET (need regsvr32):
 
     > sample.exe
@@ -68,4 +75,4 @@ Test for .NET (no-need regsvr32):
 [NaturalStyle PREMIUM](https://p.na-s.jp)
 
 ---
-yrm.20260901
+yrm.20261125
