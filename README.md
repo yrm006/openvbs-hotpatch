@@ -27,7 +27,17 @@ Microsoft is retiring VBScript, including [a planned removal from Windows Server
 
 These are integration paths demonstrated in the repository, **not a claim of complete VBScript API or host compatibility**. See [COMPATIBILITY.md](COMPATIBILITY.md) for the scope of validation still needed.
 
-## Quick start (Windows)
+## Quick start
+
+### Download
+
+Download a [Release package](./openvbs-hotpatch/releases).
+
+### Install
+
+Unpack the package to your directory and regsvr32 it to your registry.(see README.txt inside)
+
+## Quick start (from source code)
 
 ### Prerequisites
 
