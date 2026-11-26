@@ -31,7 +31,7 @@ These are integration paths demonstrated in the repository, **not a claim of com
 
 ### Download
 
-Download a [Release package](./openvbs-hotpatch/releases).
+Download a [Release package](https://github.com/yrm006/openvbs-hotpatch/releases).
 
 ### Install
 
