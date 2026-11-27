@@ -154,6 +154,12 @@ DEBUG("%s\n", __func__)
 DEBUG("%s\n", __func__)
     }
 
+    void Clear(){
+        m_pProcessor = nullptr;
+        m_addedItems.clear();
+        m_ids.clear();
+    }
+
 public:
     IDispatch* m_pProcessor = nullptr; // weak ptr
 
@@ -3037,6 +3043,15 @@ private:
 
 	bool m_stop = false;
 
+private:
+    SCODE ToScriptSCode(const Error* err){
+        if(FAILED(err->scode)) return err->scode;
+
+        WORD code = err->wCode ? err->wCode : (err->scode ? (WORD)err->scode : 1002);
+
+        return MAKE_HRESULT(SEVERITY_ERROR, FACILITY_CONTROL, code);
+    }
+
 public:
     OBScript(){
 DEBUG("%s\n", __func__)
@@ -3103,7 +3118,22 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
                 arg.bstrVal = bstrExpr;
             };
             DISPPARAMS dp = { &arg, nullptr, 1, 0 };
+            m_pPrcs->m_err.Attach(new Error());
             HRESULT hr = m_pPrcs->Invoke(DISPID_EVAL, IID_NULL, 0, DISPATCH_METHOD, &dp, pvarResult, pexcepinfo, nullptr);
+            if(FAILED(hr)){
+                ActiveScriptError* perr = new ActiveScriptError(
+                    L"openvbs",
+                    m_pPrcs->m_err->bstrDescription,
+                    ToScriptSCode(m_pPrcs->m_err),
+                    (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + m_pPrcs->m_err->dwHelpContext,
+                    -1,
+                    nullptr
+                );
+                m_pSite->OnScriptError(perr);
+                perr->Release();
+
+                hr = SCRIPT_E_REPORTED;
+            }
             SysFreeString(bstrExpr);
 
             return hr;
@@ -3131,7 +3161,7 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
 			ActiveScriptError* perr = new ActiveScriptError(
 				L"openvbs",
 				L"parse error",
-				E_FAIL,
+				E_INVALIDARG,
 				ulStartingLineNumber + errline,
 				-1,
 				L"..."
@@ -3150,7 +3180,7 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
                 ActiveScriptError* perr = new ActiveScriptError(
                     L"openvbs",
                     m_pPrcs->m_err->bstrDescription,
-                    m_pPrcs->m_err->scode,
+                    ToScriptSCode(m_pPrcs->m_err),
                     (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + m_pPrcs->m_err->dwHelpContext,
                     -1,
                     nullptr
@@ -3197,11 +3227,15 @@ DEBUG("%s\n", __func__)
 		/* [in] */ SCRIPTSTATE ss
 	){
 		if(ss == SCRIPTSTATE_INITIALIZED){
-DEBUG("%s: SCRIPTSTATE_INITIALIZED\n", __func__)
 			// AddNamedItem has been called
+            if(m_pPrcs){
+                delete m_pPrcs; m_pPrcs = nullptr;
+                m_ext.clear();
+                m_vbs.Clear();
+                m_stop = false;
+            }
 		}else
 		if(ss == SCRIPTSTATE_STARTED || ss == SCRIPTSTATE_CONNECTED){
-DEBUG("%s: SCRIPTSTATE_STARTED\n", __func__)
             // Obtain context objects
             auto i = m_ext.begin();
             while( i != m_ext.end() ){
@@ -3227,18 +3261,15 @@ DEBUG("%s: SCRIPTSTATE_STARTED\n", __func__)
             HRESULT hr = (*m_pPrcs)();
 
 			if(FAILED(hr)){
-DEBUG("  [!!!ERROR!!!] %ls in line:%d\n", m_pPrcs->m_err->bstrDescription, m_pPrcs->m_err->dwHelpContext)
                 ActiveScriptError* perr = new ActiveScriptError( m_pPrcs->m_err );
 				perr->ulLineNumber = m_pPrcs->m_err->dwHelpContext;
                 m_pSite->OnScriptError(perr);
                 perr->Release();
 			}
-DEBUG("  //\n")
 		}else
 		if(ss == SCRIPTSTATE_UNINITIALIZED){
-DEBUG("%s: SCRIPTSTATE_UNINITIALIZED\n", __func__)
 			// ASP execution is end
-            m_pPrcs->Reset();
+            if(m_pPrcs) m_pPrcs->Reset();
 			m_stop = false;
 
             auto i = m_ext.begin();
@@ -3247,7 +3278,7 @@ DEBUG("%s: SCRIPTSTATE_UNINITIALIZED\n", __func__)
                 ++i;
             }
 		}else{
-DEBUG("%s: %d\n", __func__, ss)
+            // none
         }
 
         m_ss = ss;
@@ -3277,6 +3308,7 @@ DEBUG("%s\n", __func__)
             m_pPrcs = nullptr;
         }
         m_ext.clear();
+        m_vbs.Clear();
         m_ss = SCRIPTSTATE_CLOSED;
 		return S_OK;
 	}
@@ -3434,7 +3466,7 @@ DEBUG("[NOTIMPL]%ls\n", buf)
                 ActiveScriptError* perr = new ActiveScriptError(
                     L"openvbs",
                     m_pPrcs->m_err->bstrDescription,
-                    m_pPrcs->m_err->scode,
+                    ToScriptSCode(m_pPrcs->m_err),
                     m_pPrcs->m_err->dwHelpContext,
                     -1,
                     nullptr

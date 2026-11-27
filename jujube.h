@@ -5952,6 +5952,10 @@ private:
         }
 
         if(i == m_s.rend()){
+            if(m_mode == &CProcessor::clock_ || m_pp->m_code.size() <= m_pc){
+                m_mode = &CProcessor::clock_throw_unexceptedend;
+                --m_pc;
+            }
             return true;
         }
 
@@ -7245,6 +7249,10 @@ public:
                     m_err = oProcessor.m_err;
                 }
             }else{
+                SysFreeString(m_err->bstrDescription);
+                m_err->bstrDescription = SysAllocString(L"Parse error");
+                m_err->dwHelpContext = errline + 1;
+
                 return E_INVALIDARG;
             }
         }else
@@ -7277,6 +7285,10 @@ public:
                     m_exec.back().push_back( proc );
                 }
             }else{
+                SysFreeString(m_err->bstrDescription);
+                m_err->bstrDescription = SysAllocString(L"Parse error");
+                m_err->dwHelpContext = errline + 1;
+
                 return E_INVALIDARG;
             }
         }else
@@ -7314,6 +7326,10 @@ public:
                     m_exec.front().push_back( proc );
                 }
             }else{
+                SysFreeString(m_err->bstrDescription);
+                m_err->bstrDescription = SysAllocString(L"Parse error");
+                m_err->dwHelpContext = errline + 1;
+
                 return E_INVALIDARG;
             }
         }else
