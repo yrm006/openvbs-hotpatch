@@ -2478,8 +2478,8 @@ public:
 std::map<istring, DISPID> VBScript::s_disps_ids{
     {L"",                         0},
     // consts
-    {L"vbBinaryCompare",          1},
-    {L"vbTextCompare",            2},
+    {L"vbUseSystem",              1},
+    {L"vbUseSystemDayOfWeek",     2},
     {L"vbSunday",                 3},
     {L"vbMonday",                 4},
     {L"vbTuesday",                5},
@@ -2487,142 +2487,179 @@ std::map<istring, DISPID> VBScript::s_disps_ids{
     {L"vbThursday",               7},
     {L"vbFriday",                 8},
     {L"vbSaturday",               9},
-    {L"vbUseSystemDayOfWeek",    10},
-    {L"vbFirstJan1",             11},
-    {L"vbFirstFourDays",         12},
-    {L"vbFirstFullWeek",         13},
-    {L"vbGeneralDate",           14},
-    {L"vbLongDate",              15},
-    {L"vbShortDate",             16},
-    {L"vbLongTime",              17},
-    {L"vbShortTime",             18},
-    {L"vbObjectError",           19},
-    {L"vbUseDefault",            20},
-    {L"vbTrue",                  21},
-    {L"vbFalse",                 22},
-    {L"vbEmpty",                 23},
-    {L"vbNull",                  24},
-    {L"vbInteger",               25},
-    {L"vbLong",                  26},
-    {L"vbSingle",                27},
-    {L"vbDouble",                28},
-    {L"vbCurrency",              29},
-    {L"vbDate",                  30},
-    {L"vbString",                31},
-    {L"vbObject",                32},
-    {L"vbError",                 33},
-    {L"vbBoolean",               34},
-    {L"vbVariant",               35},
-    {L"vbDataObject",            36},
-    {L"vbDecimal",               37},
-    {L"vbByte",                  38},
-    {L"vbArray",                 39},
-    {L"vbCr",                    40},
-    {L"VbCrLf",                  41},
-    {L"vbFormFeed",              42},
-    {L"vbLf",                    43},
-    {L"vbNewLine",               44},
-    {L"vbNullChar",              45},
-    {L"vbNullString",            46},
-    {L"vbTab",                   47},
-    {L"vbVerticalTab",           48},
+    {L"vbFirstJan1",             10},
+    {L"vbFirstFourDays",         11},
+    {L"vbFirstFullWeek",         12},
+    {L"vbOKOnly",                13},
+    {L"vbOKCancel",              14},
+    {L"vbAbortRetryIgnore",      15},
+    {L"vbYesNoCancel",           16},
+    {L"vbYesNo",                 17},
+    {L"vbRetryCancel",           18},
+    {L"vbCritical",              19},
+    {L"vbQuestion",              20},
+    {L"vbExclamation",           21},
+    {L"vbInformation",           22},
+    {L"vbDefaultButton1",        23},
+    {L"vbDefaultButton2",        24},
+    {L"vbDefaultButton3",        25},
+    {L"vbDefaultButton4",        26},
+    {L"vbApplicationModal",      27},
+    {L"vbSystemModal",           28},
+    {L"vbOK",                    29},
+    {L"vbCancel",                30},
+    {L"vbAbort",                 31},
+    {L"vbRetry",                 32},
+    {L"vbIgnore",                33},
+    {L"vbYes",                   34},
+    {L"vbNo",                    35},
+    {L"vbEmpty",                 36},
+    {L"vbNull",                  37},
+    {L"vbInteger",               38},
+    {L"vbLong",                  39},
+    {L"vbSingle",                40},
+    {L"vbDouble",                41},
+    {L"vbCurrency",              42},
+    {L"vbDate",                  43},
+    {L"vbString",                44},
+    {L"vbObject",                45},
+    {L"vbError",                 46},
+    {L"vbBoolean",               47},
+    {L"vbVariant",               48},
+    {L"vbDataObject",            49},
+    {L"vbDecimal",               50},
+    {L"vbByte",                  51},
+    {L"vbArray",                 52},
+    {L"vbTrue",                  53},
+    {L"vbFalse",                 54},
+    {L"vbUseDefault",            55},
+    {L"vbBinaryCompare",         56},
+    {L"vbTextCompare",           57},
+    {L"vbDatabaseCompare",       58},
+    {L"vbGeneralDate",           59},
+    {L"vbLongDate",              60},
+    {L"vbShortDate",             61},
+    {L"vbLongTime",              62},
+    {L"vbShortTime",             63},
+    {L"vbObjectError",           64},
+    {L"vbBlack",                 65},
+    {L"vbBlue",                  66},
+    {L"vbCyan",                  67},
+    {L"vbGreen",                 68},
+    {L"vbMagenta",               69},
+    {L"vbRed",                   70},
+    {L"vbWhite",                 71},
+    {L"vbYellow",                72},
+    {L"vbCr",                    73},
+    {L"vbCrLf",                  74},
+    {L"vbNewLine",               75},
+    {L"vbFormFeed",              76},
+    {L"vbLf",                    77},
+    {L"vbNullChar",              78},
+    {L"vbNullString",            79},
+    {L"vbTab",                   80},
+    {L"vbVerticalTab",           81},
+    {L"vbMsgBoxHelpButton",      82},
+    {L"VbMsgBoxSetForeground",   83},
+    {L"vbMsgBoxRight",           84},
+    {L"vbMsgBoxRtlReading",      85},
     // functions
-    {L"CreateObject",            49},
-    {L"GetObject",               50},
-    {L"TypeName",                51},
-    {L"VarDump",                 52},
-    {L"VarType",                 53},
-    {L"IsArray",                 54},
-    {L"IsObject",                55},
-    {L"IsEmpty",                 56},
-    {L"IsNull",                  57},
-    {L"IsDate",                  58},
-    {L"IsNumeric",               59},
-    {L"CBool",                   60},
-    {L"CByte",                   61},
-    {L"CCur",                    62},
-    {L"CDate",                   63},
-    {L"CDbl",                    64},
-    {L"CInt",                    65},
-    {L"CLng",                    66},
-    {L"CLnglng",                 67},
-    {L"CSng",                    68},
-    {L"CStr",                    69},
-    {L"LBound",                  70},
-    {L"UBound",                  71},
-    {L"Array",                   72},
-    {L"Randomize",               73},
-    {L"Rnd",                     74},
-    {L"Int",                     75},
-    {L"Fix",                     76},
-    {L"Round",                   77},
-    {L"Sgn",                     78},
-    {L"Abs",                     79},
-    {L"Sqr",                     80},
-    {L"Sin",                     81},
-    {L"Cos",                     82},
-    {L"Tan",                     83},
-    {L"Atn",                     84},
-    {L"Log",                     85},
-    {L"Exp",                     86},
-    {L"Len",                     87},
-    {L"Left",                    88},
-    {L"Right",                   89},
-    {L"Mid",                     90},
-    {L"LCase",                   91},
-    {L"UCase",                   92},
-    {L"LTrim",                   93},
-    {L"RTrim",                   94},
-    {L"Trim",                    95},
-    {L"InStr",                   96},
-    {L"InStrRev",                97},
-    {L"StrComp",                 98},
-    {L"Replace",                 99},
-    {L"StrReverse",             100},
-    {L"String",                 101},
-    {L"Space",                  102},
-    {L"Chr",                    103},
-    {L"ChrW",                   104},
-    {L"Asc",                    105},
-    {L"AscW",                   106},
-    {L"Oct",                    107},
-    {L"Hex",                    108},
-    {L"Join",                   109},
-    {L"Split",                  110},
-    {L"Filter",                 111},
-    {L"Now",                    112},
-    {L"Date",                   113},
-    {L"Time",                   114},
-    {L"Year",                   115},
-    {L"Month",                  116},
-    {L"Day",                    117},
-    {L"Weekday",                118},
-    {L"Hour",                   119},
-    {L"Minute",                 120},
-    {L"Second",                 121},
-    {L"Timer",                  122},
-    {L"DateAdd",                123},
-    {L"DateDiff",               124},
-    {L"DatePart",               125},
-    {L"DateSerial",             126},
-    {L"DateValue",              127},
-    {L"TimeSerial",             128},
-    {L"TimeValue",              129},
-    {L"FormatCurrency",         130},
-    {L"FormatDateTime",         131},
-    {L"FormatNumber",           132},
-    {L"FormatPercent",          133},
-    {L"Eval",                   134},
-    {L"Execute",                135},
-    {L"ExecuteGlobal",          136},
+    {L"CreateObject",            86},
+    {L"GetObject",               87},
+    {L"TypeName",                88},
+    {L"VarDump",                 89},
+    {L"VarType",                 90},
+    {L"IsArray",                 91},
+    {L"IsObject",                92},
+    {L"IsEmpty",                 93},
+    {L"IsNull",                  94},
+    {L"IsDate",                  95},
+    {L"IsNumeric",               96},
+    {L"CBool",                   97},
+    {L"CByte",                   98},
+    {L"CCur",                    99},
+    {L"CDate",                  100},
+    {L"CDbl",                   101},
+    {L"CInt",                   102},
+    {L"CLng",                   103},
+    {L"CLnglng",                104},
+    {L"CSng",                   105},
+    {L"CStr",                   106},
+    {L"LBound",                 107},
+    {L"UBound",                 108},
+    {L"Array",                  109},
+    {L"Randomize",              110},
+    {L"Rnd",                    111},
+    {L"Int",                    112},
+    {L"Fix",                    113},
+    {L"Round",                  114},
+    {L"Sgn",                    115},
+    {L"Abs",                    116},
+    {L"Sqr",                    117},
+    {L"Sin",                    118},
+    {L"Cos",                    119},
+    {L"Tan",                    120},
+    {L"Atn",                    121},
+    {L"Log",                    122},
+    {L"Exp",                    123},
+    {L"Len",                    124},
+    {L"Left",                   125},
+    {L"Right",                  126},
+    {L"Mid",                    127},
+    {L"LCase",                  128},
+    {L"UCase",                  129},
+    {L"LTrim",                  130},
+    {L"RTrim",                  131},
+    {L"Trim",                   132},
+    {L"InStr",                  133},
+    {L"InStrRev",               134},
+    {L"StrComp",                135},
+    {L"Replace",                136},
+    {L"StrReverse",             137},
+    {L"String",                 138},
+    {L"Space",                  139},
+    {L"Chr",                    140},
+    {L"ChrW",                   141},
+    {L"Asc",                    142},
+    {L"AscW",                   143},
+    {L"Oct",                    144},
+    {L"Hex",                    145},
+    {L"Join",                   146},
+    {L"Split",                  147},
+    {L"Filter",                 148},
+    {L"Now",                    149},
+    {L"Date",                   150},
+    {L"Time",                   151},
+    {L"Year",                   152},
+    {L"Month",                  153},
+    {L"Day",                    154},
+    {L"Weekday",                155},
+    {L"Hour",                   156},
+    {L"Minute",                 157},
+    {L"Second",                 158},
+    {L"Timer",                  159},
+    {L"DateAdd",                160},
+    {L"DateDiff",               161},
+    {L"DatePart",               162},
+    {L"DateSerial",             163},
+    {L"DateValue",              164},
+    {L"TimeSerial",             165},
+    {L"TimeValue",              166},
+    {L"FormatCurrency",         167},
+    {L"FormatDateTime",         168},
+    {L"FormatNumber",           169},
+    {L"FormatPercent",          170},
+    {L"Eval",                   171},
+    {L"Execute",                172},
+    {L"ExecuteGlobal",          173},
 };
-int VBScript::s_disps_n = 137;
+int VBScript::s_disps_n = 174;
 
 std::vector<VBScript::invoke_t> VBScript::s_invokes{
     &VBScript::_, // ""
     //[ consts ]
-    nullptr, // vbBinaryCompare
-    nullptr, // vbTextCompare
+    nullptr, // vbUseSystem
+    nullptr, // vbUseSystemDayOfWeek
     nullptr, // vbSunday
     nullptr, // vbMonday
     nullptr, // vbTuesday
@@ -2630,19 +2667,32 @@ std::vector<VBScript::invoke_t> VBScript::s_invokes{
     nullptr, // vbThursday
     nullptr, // vbFriday
     nullptr, // vbSaturday
-    nullptr, // vbUseSystemDayOfWeek
     nullptr, // vbFirstJan1
     nullptr, // vbFirstFourDays
     nullptr, // vbFirstFullWeek
-    nullptr, // vbGeneralDate
-    nullptr, // vbLongDate
-    nullptr, // vbShortDate
-    nullptr, // vbLongTime
-    nullptr, // vbShortTime
-    nullptr, // vbObjectError
-    nullptr, // vbUseDefault
-    nullptr, // vbTrue
-    nullptr, // vbFalse
+    nullptr, // vbOKOnly
+    nullptr, // vbOKCancel
+    nullptr, // vbAbortRetryIgnore
+    nullptr, // vbYesNoCancel
+    nullptr, // vbYesNo
+    nullptr, // vbRetryCancel
+    nullptr, // vbCritical
+    nullptr, // vbQuestion
+    nullptr, // vbExclamation
+    nullptr, // vbInformation
+    nullptr, // vbDefaultButton1
+    nullptr, // vbDefaultButton2
+    nullptr, // vbDefaultButton3
+    nullptr, // vbDefaultButton4
+    nullptr, // vbApplicationModal
+    nullptr, // vbSystemModal
+    nullptr, // vbOK
+    nullptr, // vbCancel
+    nullptr, // vbAbort
+    nullptr, // vbRetry
+    nullptr, // vbIgnore
+    nullptr, // vbYes
+    nullptr, // vbNo
     nullptr, // vbEmpty
     nullptr, // vbNull
     nullptr, // vbInteger
@@ -2660,15 +2710,39 @@ std::vector<VBScript::invoke_t> VBScript::s_invokes{
     nullptr, // vbDecimal
     nullptr, // vbByte
     nullptr, // vbArray
+    nullptr, // vbTrue
+    nullptr, // vbFalse
+    nullptr, // vbUseDefault
+    nullptr, // vbBinaryCompare
+    nullptr, // vbTextCompare
+    nullptr, // vbDatabaseCompare
+    nullptr, // vbGeneralDate
+    nullptr, // vbLongDate
+    nullptr, // vbShortDate
+    nullptr, // vbLongTime
+    nullptr, // vbShortTime
+    nullptr, // vbObjectError
+    nullptr, // vbBlack
+    nullptr, // vbBlue
+    nullptr, // vbCyan
+    nullptr, // vbGreen
+    nullptr, // vbMagenta
+    nullptr, // vbRed
+    nullptr, // vbWhite
+    nullptr, // vbYellow
     nullptr, // vbCr
-    nullptr, // VbCrLf
+    nullptr, // vbCrLf
+    nullptr, // vbNewLine
     nullptr, // vbFormFeed
     nullptr, // vbLf
-    nullptr, // vbNewLine
     nullptr, // vbNullChar
     nullptr, // vbNullString
     nullptr, // vbTab
     nullptr, // vbVerticalTab
+    nullptr, // vbMsgBoxHelpButton
+    nullptr, // VbMsgBoxSetForeground
+    nullptr, // vbMsgBoxRight
+    nullptr, // vbMsgBoxRtlReading
     //[ functions ]
     &VBScript::vbCreateObject  ,
     &VBScript::vbGetObject     ,
@@ -2763,54 +2837,91 @@ std::vector<VBScript::invoke_t> VBScript::s_invokes{
 std::vector<_variant_t> VBScript::s_disps{
     _variant_t{ {{{VT_ERROR,0,0,0,{}}}} },
     // consts
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                          , // vbBinaryCompare
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                          , // vbTextCompare
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                          , // vbSunday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                          , // vbMonday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                          , // vbTuesday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                          , // vbWednesday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)5}}}} }                          , // vbThursday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)6}}}} }                          , // vbFriday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)7}}}} }                          , // vbSaturday
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                          , // vbUseSystemDayOfWeek
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                          , // vbFirstJan1
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                          , // vbFirstFourDays
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                          , // vbFirstFullWeek
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                          , // vbGeneralDate
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                          , // vbLongDate
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                          , // vbShortDate
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                          , // vbLongTime
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                          , // vbShortTime
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x80040000}}}} }                 , // vbObjectError
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)-2}}}} }                         , // vbUseDefault
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)-1}}}} }                         , // vbTrue
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                          , // vbFalse
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                          , // vbEmpty
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                          , // vbNull
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                          , // vbInteger
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                          , // vbLong
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                          , // vbSingle
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)5}}}} }                          , // vbDouble
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)6}}}} }                          , // vbCurrency
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)7}}}} }                          , // vbDate
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)8}}}} }                          , // vbString
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)9}}}} }                          , // vbObject
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)10}}}} }                         , // vbError
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)11}}}} }                         , // vbBoolean
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)12}}}} }                         , // vbVariant
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)13}}}} }                         , // vbDataObject
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)14}}}} }                         , // vbDecimal
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)17}}}} }                         , // vbByte
-    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x2000}}}} }                     , // vbArray
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0D")}}}} }    , // vbCr
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0D\x0A")}}}} }, // VbCrLf
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0C")}}}} }    , // vbFormFeed
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0A")}}}} }    , // vbLf
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0A")}}}} }    , // vbNewLine
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x00")}}}} }    , // vbNullChar
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(nullptr)}}}} }    , // vbNullString
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x09")}}}} }    , // vbTab
-    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0b")}}}} }    , // vbVerticalTab
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbUseSystem
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbUseSystemDayOfWeek
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbSunday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbMonday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                            , // vbTuesday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                            , // vbWednesday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)5}}}} }                            , // vbThursday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)6}}}} }                            , // vbFriday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)7}}}} }                            , // vbSaturday
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbFirstJan1
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbFirstFourDays
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                            , // vbFirstFullWeek
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbOKOnly
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbOKCancel
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbAbortRetryIgnore
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                            , // vbYesNoCancel
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                            , // vbYesNo
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)5}}}} }                            , // vbRetryCancel
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)16}}}} }                           , // vbCritical
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)32}}}} }                           , // vbQuestion
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)48}}}} }                           , // vbExclamation
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)64}}}} }                           , // vbInformation
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbDefaultButton1
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)256}}}} }                          , // vbDefaultButton2
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)512}}}} }                          , // vbDefaultButton3
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)768}}}} }                          , // vbDefaultButton4
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbApplicationModal
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4096}}}} }                         , // vbSystemModal
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbOK
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbCancel
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                            , // vbAbort
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                            , // vbRetry
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)5}}}} }                            , // vbIgnore
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)6}}}} }                            , // vbYes
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)7}}}} }                            , // vbNo
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbEmpty
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbNull
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbInteger
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                            , // vbLong
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                            , // vbSingle
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)5}}}} }                            , // vbDouble
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)6}}}} }                            , // vbCurrency
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)7}}}} }                            , // vbDate
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)8}}}} }                            , // vbString
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)9}}}} }                            , // vbObject
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)10}}}} }                           , // vbError
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)11}}}} }                           , // vbBoolean
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)12}}}} }                           , // vbVariant
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)13}}}} }                           , // vbDataObject
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)14}}}} }                           , // vbDecimal
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)17}}}} }                           , // vbByte
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x2000}}}} }                       , // vbArray
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)-1}}}} }                           , // vbTrue
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbFalse
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)-2}}}} }                           , // vbUseDefault
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbBinaryCompare
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbTextCompare
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbDatabaseCompare
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0}}}} }                            , // vbGeneralDate
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)1}}}} }                            , // vbLongDate
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)2}}}} }                            , // vbShortDate
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)3}}}} }                            , // vbLongTime
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)4}}}} }                            , // vbShortTime
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)(long)0x80040000}}}} }             , // vbObjectError
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x000000}}}} }                     , // vbBlack
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0xFF0000}}}} }                     , // vbBlue
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0xFFFF00}}}} }                     , // vbCyan
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x00FF00}}}} }                     , // vbGreen
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0xFF00FF}}}} }                     , // vbMagenta
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x0000FF}}}} }                     , // vbRed
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0xFFFFFF}}}} }                     , // vbWhite
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x00FFFF}}}} }                     , // vbYellow
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0D")}}}} }      , // vbCr
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0D\x0A")}}}} }  , // VbCrLf
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0D\x0A")}}}} }  , // vbNewLine
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0C")}}}} }      , // vbFormFeed
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0A")}}}} }      , // vbLf
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocStringLen(L"\x00", 1)}}}} }, // vbNullChar
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(nullptr)}}}} }      , // vbNullString
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x09")}}}} }      , // vbTab
+    _variant_t{ {{{VT_BSTR,0,0,0,{(long long)SysAllocString(L"\x0b")}}}} }      , // vbVerticalTab
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x004000}}}} }                     , // vbMsgBoxHelpButton
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x010000}}}} }                     , // vbMsgBoxSetForeground
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x080000}}}} }                     , // vbMsgBoxRight
+    _variant_t{ {{{VT_I8  ,0,0,0,{(long long)0x100000}}}} }                     , // vbMsgBoxRtlReading
     // functions
     _variant_t{ {{{VT_ERROR,0,0,0,{}}}} }, // CreateObject
     _variant_t{ {{{VT_ERROR,0,0,0,{}}}} }, // GetObject
