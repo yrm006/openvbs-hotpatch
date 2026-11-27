@@ -6712,16 +6712,31 @@ public:
     }
 
     HRESULT operator()(CProgram& prog, VARIANT args[], int argn){
+        if(prog.m_params.size() < (size_t)argn){
+            m_err->scode = 0x202;
+            m_err->dwHelpContext = prog.m_code.size() ? prog.m_code[0].l + 1 : 1;
+            SysFreeString(m_err->bstrSource);      m_err->bstrSource      = SysAllocString(NAME);
+            SysFreeString(m_err->bstrDescription); m_err->bstrDescription = SysAllocString(L"Too many args");
+
+            return DISP_E_BADPARAMCOUNT;
+        }
+
+        auto pre_scope   = m_scope.size();
+        auto pre_autodim = m_autodim.size();
+        auto pre_with    = m_with.size();
+        auto pre_onerr   = m_onerr.size();
+        auto pre_exec    = m_exec.size();
+
         m_scope.push_back( prog.m_dim_defs );
-        std::vector<_variant_t>& newscope = m_scope.back();
         m_autodim.push_back( {} );
         m_with.push_back( { _variant_t{{{{VT_EMPTY,0,0,0,{}}}}} } );
         m_onerr.push_back(&CProcessor::onerr_goto0);
         m_exec.push_back( {} );
 
-        int i = 0;
-        while(i<argn){
-            if(i < prog.m_params.size()){
+        std::vector<_variant_t>& newscope = m_scope.back();
+        {
+            int i = 0;
+            while(i<argn){
                 VARIANT* pv = args+(argn-1-i);
                 if(pv->vt == (VT_BYREF|VT_VARIANT)){
                     newscope[i+1] = *pv;
@@ -6729,17 +6744,13 @@ public:
                     newscope[i+1].vt = (VT_BYREF|VT_VARIANT);
                     newscope[i+1].pvarVal = pv;
                 }
-            }else{
-                m_mode = &CProcessor::clock_throw_toomanyarg;
-                --m_pc;
-                return E_INVALIDARG;
+                ++i;
             }
-            ++i;
         }
-        
-        {
-            m_s.push_back( _variant_t() );
 
+        auto pre_s = m_s.size();
+        m_s.push_back( _variant_t() );
+        {
             _variant_t& ret = newscope[0];
             ret.vt = (VT_BYREF|VT_VARIANT);
             ret.pvarVal = &m_s.back();
@@ -6763,10 +6774,30 @@ public:
             m_s.push_back(v);
         }
 
+        auto pre_pp = m_pp;
+        auto pre_pc = m_pc;
+        auto pre_mode = m_mode;
+
         m_pp = &prog;
         m_pc = 0;
+        m_mode = &CProcessor::clock_;
 
-        return operator()();
+        HRESULT hr = operator()();
+        if(FAILED(hr)){
+            while(pre_scope   < m_scope.size()  ) m_scope.pop_back();
+            while(pre_autodim < m_autodim.size()) m_autodim.pop_back();
+            while(pre_with    < m_with.size()   ) m_with.pop_back();
+            while(pre_onerr   < m_onerr.size()  ) m_onerr.pop_back();
+            while(pre_exec    < m_exec.size()   ) m_exec.pop_back();
+
+            while(pre_s < m_s.size()) m_s.pop_back();
+
+            m_pp = pre_pp;
+            m_pc = pre_pc;
+            m_mode = pre_mode;
+        }
+
+        return hr;
     }
 
     HRESULT operator()(){
@@ -7289,6 +7320,7 @@ public:
         {
             dispatch_t& disp = m_disp.at(dispIdMember-DISPID_FORDYNAMICDISP);
             if(disp.pr){
+                disp.pr->m_err.Attach(new Error());
                 hr = disp.pr->Invoke(disp.id, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
                 if(FAILED(hr) && disp.pr->m_err){
                     m_err = disp.pr->m_err;
