@@ -3142,7 +3142,24 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
             hr = SCRIPT_E_REPORTED;
         }else
         if(m_pPrcs){
+            m_pPrcs->m_err.Attach(new Error());
+
             hr = (*m_pPrcs += prog);
+
+            if(FAILED(hr)){
+                ActiveScriptError* perr = new ActiveScriptError(
+                    L"openvbs",
+                    m_pPrcs->m_err->bstrDescription,
+                    m_pPrcs->m_err->scode,
+                    (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + m_pPrcs->m_err->dwHelpContext,
+                    -1,
+                    nullptr
+                );
+                m_pSite->OnScriptError(perr);
+                perr->Release();
+
+                hr = SCRIPT_E_REPORTED;
+            }
         }else{
             m_pPrcs = new CProcessor(prog, &m_vbs, &m_ext, &m_stop);
             m_vbs.m_pProcessor = m_pPrcs;
@@ -3409,7 +3426,26 @@ DEBUG("[NOTIMPL]%ls\n", buf)
         DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
     {
         if(m_pPrcs){
-            return m_pPrcs->Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+            m_pPrcs->m_err.Attach(new Error());
+
+            HRESULT hr = m_pPrcs->Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+
+            if(FAILED(hr)){
+                ActiveScriptError* perr = new ActiveScriptError(
+                    L"openvbs",
+                    m_pPrcs->m_err->bstrDescription,
+                    m_pPrcs->m_err->scode,
+                    m_pPrcs->m_err->dwHelpContext,
+                    -1,
+                    nullptr
+                );
+                m_pSite->OnScriptError(perr);
+                perr->Release();
+
+                hr = SCRIPT_E_REPORTED;
+            }
+
+            return hr;
         }else
         {
             return DISP_E_MEMBERNOTFOUND;

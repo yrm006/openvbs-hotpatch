@@ -5951,6 +5951,10 @@ private:
             }
         }
 
+        if(i == m_s.rend()){
+            return true;
+        }
+
         if(m_s.back().wReserved1 == VTX_GROUND){
             m_s.pop_back();
 
@@ -7205,6 +7209,9 @@ public:
                     }else{
                         return E_FAIL;
                     }
+                }else
+                if(oProcessor.m_err){
+                    m_err = oProcessor.m_err;
                 }
             }else{
                 return E_INVALIDARG;
@@ -7283,6 +7290,9 @@ public:
             dispatch_t& disp = m_disp.at(dispIdMember-DISPID_FORDYNAMICDISP);
             if(disp.pr){
                 hr = disp.pr->Invoke(disp.id, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+                if(FAILED(hr) && disp.pr->m_err){
+                    m_err = disp.pr->m_err;
+                }
             }else
             if(disp.pv){
                 if(wFlags & DISPATCH_PROPERTYPUT){
