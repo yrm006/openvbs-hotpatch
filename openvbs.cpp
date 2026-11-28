@@ -3027,6 +3027,111 @@ std::vector<_variant_t> VBScript::s_disps{
 
 
 
+SCODE ToScriptSCode(const Error* err){
+    if(FAILED(err->scode)) return err->scode;
+
+    WORD code = err->wCode ? err->wCode : (err->scode ? (WORD)err->scode : 1002);
+
+    return MAKE_HRESULT(SEVERITY_ERROR, FACILITY_CONTROL, code);
+}
+
+
+
+class OBModule : public IDispatch{
+private:
+    volatile LONG       m_refc   = 1;
+
+public:
+	IActiveScriptSite* m_pSite;
+
+    VBScript    m_sub_vbs;
+    CProcessor* m_sub_pPrcs;
+
+    OBModule(IActiveScriptSite* site)
+        : m_pSite(site)
+        , m_sub_pPrcs(NULL)
+    {
+        if(m_pSite) m_pSite->AddRef();
+    }
+
+    ~OBModule(){
+        Close();
+    }
+
+    void Close(){
+        if(m_pSite){
+            m_pSite->Release();
+            m_pSite = nullptr;
+        }
+        if(m_sub_pPrcs){
+            m_sub_pPrcs->Release();
+            m_sub_pPrcs = nullptr;
+        }
+        m_sub_vbs.Clear();
+    }
+
+// IDispatch
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject){
+        if(!ppvObject) return E_POINTER;
+
+		if(::IsEqualGUID(riid, IID_IUnknown)){
+			*ppvObject = (IDispatch*)this;
+		}else
+		if(::IsEqualGUID(riid, IID_IDispatch)){
+			*ppvObject = (IDispatch*)this;
+		}else{
+			return E_NOINTERFACE;
+		}
+
+		this->AddRef();
+		return S_OK;
+	}
+    ULONG STDMETHODCALLTYPE AddRef(){ return InterlockedIncrement(&m_refc); }
+    ULONG STDMETHODCALLTYPE Release(){ LONG refc = InterlockedDecrement(&m_refc); if(!refc){ delete this; return 0; } return refc; }
+
+    HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId){
+        if(m_sub_pPrcs){
+            return m_sub_pPrcs->GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
+        }else
+        {
+            return DISP_E_UNKNOWNNAME;
+        }
+    }
+    HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, 
+        DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+    {
+        if(m_sub_pPrcs){
+            m_sub_pPrcs->m_err.Attach(new Error());
+
+            HRESULT hr = m_sub_pPrcs->Invoke(dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
+
+            if(FAILED(hr)){
+                ActiveScriptError* perr = new ActiveScriptError(
+                    L"openvbs",
+                    m_sub_pPrcs->m_err->bstrDescription,
+                    ToScriptSCode(m_sub_pPrcs->m_err),
+                    m_sub_pPrcs->m_err->dwHelpContext,
+                    -1,
+                    nullptr
+                );
+                m_pSite->OnScriptError(perr);
+                perr->Release();
+
+                hr = SCRIPT_E_REPORTED;
+            }
+
+            return hr;
+        }else
+        {
+            return DISP_E_MEMBERNOTFOUND;
+        }
+    }
+};
+
+
+
 class OBScript : public IDispatch,
 	public IActiveScriptParse,
 	public IActiveScript,
@@ -3041,15 +3146,19 @@ private:
 	CExtension	m_ext;
     CProcessor* m_pPrcs = nullptr;
 
+    std::map<istring, _disp_ptr_t> m_modules;
+
 	bool m_stop = false;
 
 private:
-    SCODE ToScriptSCode(const Error* err){
-        if(FAILED(err->scode)) return err->scode;
-
-        WORD code = err->wCode ? err->wCode : (err->scode ? (WORD)err->scode : 1002);
-
-        return MAKE_HRESULT(SEVERITY_ERROR, FACILITY_CONTROL, code);
+    void ReleaseGlobalAndClearModules(){
+        //NEEDED: each OBModule::Close(). the Site may hold a module, the module has the m_pPrcs as m_global(weak)
+        auto i = m_modules.begin();
+        while(i != m_modules.end()){
+            ((OBModule*)(IDispatch*)i->second)->Close();
+            ++i;
+        }
+        m_modules.clear();
     }
 
 public:
@@ -3058,7 +3167,9 @@ DEBUG("%s\n", __func__)
     }
     ~OBScript(){
 DEBUG("%s\n", __func__)
-        if(m_pPrcs) delete m_pPrcs;
+        ReleaseGlobalAndClearModules();//NEEDED: above m_pPrcs
+        if(m_pSite) m_pSite->Release();
+        if(m_pPrcs) m_pPrcs->Release();
     }
 
 // IActiveScriptParse
@@ -3108,7 +3219,13 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
         HRESULT hr = E_FAIL;
 
 		if(dwFlags & SCRIPTTEXT_ISEXPRESSION){
-            if(!m_pPrcs) return E_FAIL;
+            CProcessor* pPrcs = m_pPrcs;
+            if(pstrItemName){
+                auto found = m_modules.find(pstrItemName);
+                pPrcs = (found != m_modules.end()) ? ((OBModule*)(IDispatch*)found->second)->m_sub_pPrcs : nullptr;
+            }
+
+            if(!pPrcs) return E_FAIL;
             
             if(pvarResult) VariantInit(pvarResult);
 
@@ -3118,14 +3235,14 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
                 arg.bstrVal = bstrExpr;
             };
             DISPPARAMS dp = { &arg, nullptr, 1, 0 };
-            m_pPrcs->m_err.Attach(new Error());
-            HRESULT hr = m_pPrcs->Invoke(DISPID_EVAL, IID_NULL, 0, DISPATCH_METHOD, &dp, pvarResult, pexcepinfo, nullptr);
+            pPrcs->m_err.Attach(new Error());
+            HRESULT hr = pPrcs->Invoke(DISPID_EVAL, IID_NULL, 0, DISPATCH_METHOD, &dp, pvarResult, pexcepinfo, nullptr);
             if(FAILED(hr)){
                 ActiveScriptError* perr = new ActiveScriptError(
                     L"openvbs",
-                    m_pPrcs->m_err->bstrDescription,
-                    ToScriptSCode(m_pPrcs->m_err),
-                    (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + m_pPrcs->m_err->dwHelpContext,
+                    pPrcs->m_err->bstrDescription,
+                    ToScriptSCode(pPrcs->m_err),
+                    (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + pPrcs->m_err->dwHelpContext,
                     -1,
                     nullptr
                 );
@@ -3170,30 +3287,73 @@ DEBUG("%s: %ls\n", __func__, pstrCode)
 			perr->Release();
 
             hr = SCRIPT_E_REPORTED;
-        }else
-        if(m_pPrcs){
-            m_pPrcs->m_err.Attach(new Error());
-
-            hr = (*m_pPrcs += prog);
-
-            if(FAILED(hr)){
-                ActiveScriptError* perr = new ActiveScriptError(
-                    L"openvbs",
-                    m_pPrcs->m_err->bstrDescription,
-                    ToScriptSCode(m_pPrcs->m_err),
-                    (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + m_pPrcs->m_err->dwHelpContext,
-                    -1,
-                    nullptr
-                );
-                m_pSite->OnScriptError(perr);
-                perr->Release();
-
-                hr = SCRIPT_E_REPORTED;
-            }
         }else{
-            m_pPrcs = new CProcessor(prog, &m_vbs, &m_ext, &m_stop);
-            m_vbs.m_pProcessor = m_pPrcs;
-            hr = S_OK;
+            if(pstrItemName){
+                auto found = m_modules.find(pstrItemName);
+                if(found != m_modules.end()){
+                    OBModule* module = (OBModule*)(IDispatch*)found->second;
+                    if(!module->m_sub_pPrcs){
+                        if(!m_pPrcs){
+                            const wchar_t* empty = L"";
+                            _prog_ptr_t emptyProg(new CProgram(empty), false);
+                            m_pPrcs = new CProcessor(emptyProg, &m_vbs, &m_ext, &m_stop);
+                            m_vbs.m_pProcessor = m_pPrcs;
+                            (*m_pPrcs)();
+                        }
+
+                        const wchar_t* empty = L"";
+                        _prog_ptr_t emptyProg(new CProgram(empty), false);
+                        module->m_sub_vbs.m_pProcessor = module->m_sub_pPrcs = new CProcessor(emptyProg, &module->m_sub_vbs, &m_ext, &m_stop, m_pPrcs);
+                        (*module->m_sub_pPrcs)();
+                    }
+
+                    module->m_sub_pPrcs->m_err.Attach(new Error());
+
+                    hr = (*module->m_sub_pPrcs += prog);
+
+                    if(FAILED(hr)){
+                        ActiveScriptError* perr = new ActiveScriptError(
+                            L"openvbs",
+                            module->m_sub_pPrcs->m_err->bstrDescription,
+                            ToScriptSCode(module->m_sub_pPrcs->m_err),
+                            (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + module->m_sub_pPrcs->m_err->dwHelpContext,
+                            -1,
+                            nullptr
+                        );
+                        m_pSite->OnScriptError(perr);
+                        perr->Release();
+
+                        hr = SCRIPT_E_REPORTED;
+                    }
+                }else{
+                    hr = E_INVALIDARG;
+                }
+            }else{
+                if(m_pPrcs){
+                    m_pPrcs->m_err.Attach(new Error());
+
+                    hr = (*m_pPrcs += prog);
+
+                    if(FAILED(hr)){
+                        ActiveScriptError* perr = new ActiveScriptError(
+                            L"openvbs",
+                            m_pPrcs->m_err->bstrDescription,
+                            ToScriptSCode(m_pPrcs->m_err),
+                            (ulStartingLineNumber > 0 ? ulStartingLineNumber - 1 : 0) + m_pPrcs->m_err->dwHelpContext,
+                            -1,
+                            nullptr
+                        );
+                        m_pSite->OnScriptError(perr);
+                        perr->Release();
+
+                        hr = SCRIPT_E_REPORTED;
+                    }
+                }else{
+                    m_pPrcs = new CProcessor(prog, &m_vbs, &m_ext, &m_stop);
+                    m_vbs.m_pProcessor = m_pPrcs;
+                    hr = S_OK;
+                }
+            }
         }
 
         free(buf);
@@ -3228,8 +3388,10 @@ DEBUG("%s\n", __func__)
 	){
 		if(ss == SCRIPTSTATE_INITIALIZED){
 			// AddNamedItem has been called
+            ReleaseGlobalAndClearModules();//NEEDED: above m_pPrcs
+
             if(m_pPrcs){
-                delete m_pPrcs; m_pPrcs = nullptr;
+                m_pPrcs->Release(); m_pPrcs = nullptr;
                 m_ext.clear();
                 m_vbs.Clear();
                 m_stop = false;
@@ -3299,12 +3461,13 @@ return S_OK;
 	HRESULT STDMETHODCALLTYPE Close(void
 	){
 DEBUG("%s\n", __func__)
+        ReleaseGlobalAndClearModules();//NEEDED: above m_pPrcs
         if(m_pSite){
             m_pSite->Release();
             m_pSite = nullptr;
         }
         if(m_pPrcs){
-            delete m_pPrcs;
+            m_pPrcs->Release();
             m_pPrcs = nullptr;
         }
         m_ext.clear();
@@ -3318,6 +3481,16 @@ DEBUG("%s\n", __func__)
 		/* [in] */ DWORD dwFlags
 	){
 DEBUG("%s: %ls 0x%04x\n", __func__, pstrName, dwFlags)
+        if(dwFlags & SCRIPTITEM_CODEONLY){
+            auto found = m_modules.find(pstrName);
+            if(found == m_modules.end()){
+                m_modules[pstrName].Attach( new OBModule(m_pSite) );
+                return S_OK;
+            }else{
+                return E_INVALIDARG;
+            }
+        }
+
 		IUnknown* p = nullptr;
 		ITypeInfo* pType = nullptr;
 		if( (dwFlags & SCRIPTITEM_ISVISIBLE) && SUCCEEDED(m_pSite->GetItemInfo(pstrName, SCRIPTINFO_IUNKNOWN, &p, &pType)) ){
@@ -3351,7 +3524,16 @@ DEBUG("%s\n", __func__)
 		/* [out] */ __RPC__deref_out_opt IDispatch **ppdisp
 	){
 DEBUG("%s\n", __func__)
-        (*ppdisp = (IDispatch*)this)->AddRef();
+        if(pstrItemName){
+            auto found = m_modules.find(pstrItemName);
+            if(found != m_modules.end()){
+                (*ppdisp = (IDispatch*)found->second)->AddRef();
+            }else{
+                return E_INVALIDARG;
+            }
+        }else{
+            (*ppdisp = (IDispatch*)this)->AddRef();
+        }
         return S_OK;
 	}
 	

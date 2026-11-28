@@ -2383,6 +2383,7 @@ private:
     typedef bool (CProcessor::*mode_t)(word_t&);
     typedef bool (CProcessor::*onerr_t)();
 
+    CProcessor*  m_global;  //!!! weak
     CProcessor*  m_parent;  //!!! weak
     CExtension*  m_ext;
     _disp_ptr_t  m_env;
@@ -6314,6 +6315,46 @@ private:
 
 
 
+        if(m_global){
+            DISPID id;
+            LPOLESTR name = (LPOLESTR)pc.s.c_str();
+            if(m_global->GetIDsOfNames(IID_NULL, &name, 1, 0, &id) == S_OK){
+                {
+                    _variant_t v;
+                    v.vt = VT_DISPATCH;
+                    (v.pdispVal = m_global)->AddRef();
+                    m_s.push_back(v);
+                }
+                {
+                    _variant_t v;
+                    v.vt = VT_I4;
+                    v.lVal = id;
+                    m_s.push_back(v);
+                }
+                {
+                    _variant_t v;
+                    v.wReserved1 = VTX_INST;
+                    v.byref = (void*)&s_insts[INST_op_invoke];
+                    m_s.push_back(v);
+                }
+
+                if( *((word_m*)(&pc+1)->p) != &CProcessor::word_parenL ){
+                    int ni = 0;{
+                        auto i = m_s.rbegin();
+                        while(!( i->wReserved1 == VTX_GROUND )){
+                            if(i->wReserved1 == VTX_INST) ++ni;
+                            ++i;
+                        }
+                    }
+                    if(1 < ni) do_left_invoke();
+                }
+
+                return true;
+            }
+        }
+
+
+
         if(m_pp->m_option_explicit){
             m_mode = &CProcessor::clock_throw_unknownname;
             --m_pc;
@@ -6520,8 +6561,9 @@ public:
 public:
     _err_ptr_t   m_err;
 
-    CProcessor(CProgram* pp, IDispatch* env, CExtension* ext, const bool* pstop, size_t size=0x100)
-        : m_parent(nullptr)
+    CProcessor(CProgram* pp, IDispatch* env, CExtension* ext, const bool* pstop, CProcessor* global=nullptr, size_t size=0x100)
+        : m_global(global)
+        , m_parent(nullptr)
         , m_ext(ext)
         , m_env(env)
         , m_p0(pp)
@@ -6559,7 +6601,8 @@ public:
     }
 
     CProcessor(CProcessor& parent, CProgram* pp)
-        : m_parent(&parent)
+        : m_global(parent.m_global)
+        , m_parent(&parent)
         , m_ext(parent.m_ext)
         , m_env(parent.m_env)
         , m_p0(pp)
@@ -6603,7 +6646,8 @@ public:
     }
 
     CProcessor(CProcessor& source)
-        : m_parent(source.m_parent)
+        : m_global(source.m_global)
+        , m_parent(source.m_parent)
         , m_ext(source.m_ext)
         , m_env(source.m_env)
         , m_p0(source.m_p0)
