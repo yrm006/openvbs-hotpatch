@@ -1045,6 +1045,11 @@ private:
             m_code.push_back( { L"public", map_word(istring(L"@")), _variant_t(), m_lines } );
             m_parse_mode = &CProgram::parse_function;
         }else
+        if(len == 3 && _wcsnicmp(L"sub", c, len) == 0){
+            m_code.push_back( { L"public", map_word(istring(L"@")), _variant_t(), m_lines } );
+            parse_function_is_sub = true;
+            m_parse_mode = &CProgram::parse_function;
+        }else
         if(len == 8 && _wcsnicmp(L"property", c, len) == 0){
             m_code.push_back( { L"public", map_word(istring(L"@")), _variant_t(), m_lines } );
             m_parse_mode = &CProgram::parse_property;
@@ -1082,6 +1087,11 @@ private:
     const wchar_t* parse_private(const wchar_t* c, size_t len){
         if(len == 8 && _wcsnicmp(L"function", c, len) == 0){
             m_code.push_back( { L"private", map_word(istring(L"@")), _variant_t(), m_lines } );
+            m_parse_mode = &CProgram::parse_function;
+        }else
+        if(len == 3 && _wcsnicmp(L"sub", c, len) == 0){
+            m_code.push_back( { L"private", map_word(istring(L"@")), _variant_t(), m_lines } );
+            parse_function_is_sub = true;
             m_parse_mode = &CProgram::parse_function;
         }else
         if(len == 8 && _wcsnicmp(L"property", c, len) == 0){
@@ -1479,6 +1489,12 @@ private:
     }
 
     const wchar_t* parse_function_param(const wchar_t* c, size_t len){
+        if(len == 5 && _wcsnicmp(L"byval", c, len) == 0){
+            // none
+        }else
+        if(len == 5 && _wcsnicmp(L"byref", c, len) == 0){
+            // none
+        }else
         if(len == 1 && _wcsnicmp(L"(", c, len) == 0){
             // none
         }else
@@ -1528,6 +1544,8 @@ private:
         return c;
     }
 
+    bool parse_function_is_sub = false;
+
     const wchar_t* parse_function(const wchar_t* c, size_t len){
         if(*c == L'('){
             _prog_ptr_t prog(new CProgram(c, &CProgram::parse_function_noname, this), false);
@@ -1571,6 +1589,8 @@ private:
             istring name(c, len);
             _prog_ptr_t prog(new CProgram(c, &CProgram::parse_function_name, this), false);
 
+            prog->m_is_sub = parse_function_is_sub;
+
             if(type == DISPATCH_PROPERTYPUT){
                 m_plets.insert({name, {ds, prog}});
             }else{
@@ -1585,6 +1605,7 @@ private:
         }
 
         m_parse_mode = &CProgram::parse_;
+        parse_function_is_sub = false;
         return c;
     }
 
@@ -1712,6 +1733,7 @@ private:
             m_parse_mode = &CProgram::parse_function;
         }else
         if(len == 3 && _wcsnicmp(L"sub", c, len) == 0){
+            parse_function_is_sub = true;
             m_parse_mode = &CProgram::parse_function;
         }else
         if(len == 8 && _wcsnicmp(L"property", c, len) == 0){
@@ -2035,6 +2057,8 @@ public:
     size_t                          m_lines;
     size_t                          m_pline;
 
+    bool                            m_is_sub;
+
     //### this copy-constructor has error, check it.
     CProgram(const CProgram& r)
         : m_option_explicit(r.m_option_explicit)
@@ -2053,6 +2077,7 @@ public:
         , m_granpa(r.m_granpa)
         , m_lines(r.m_lines)
         , m_pline(r.m_pline)
+        , m_is_sub(r.m_is_sub)
     {
         {
             auto i = r.m_funcs.begin();
@@ -2107,6 +2132,7 @@ public:
         , m_granpa(parent ? parent->m_granpa : this)
         , m_lines(parent ? parent->m_lines : 0)
         , m_pline(parent ? parent->m_lines : 0)
+        , m_is_sub(false)
     {
         {
             istring s(L":");
@@ -3833,7 +3859,7 @@ private:
                 0,
                 0,
             };
-            _com_util::CheckError( pv->pdispVal->Invoke(DISPID_NEWENUM, IID_NULL, 0, DISPATCH_METHOD, &param, &res, nullptr, nullptr) );
+            _com_util::CheckError( pv->pdispVal->Invoke(DISPID_NEWENUM, IID_NULL, 0, DISPATCH_METHOD | DISPATCH_PROPERTYGET, &param, &res, nullptr, nullptr) );
         }else{
             _com_util::CheckError( E_FAIL );
         }
@@ -7408,6 +7434,47 @@ public:
         }
 
         return hr;
+    }
+
+public:
+    struct proc_info_t {
+        istring name;
+        DISPID  memid;
+        UINT    numArgs;
+        bool    hasReturn;
+    };
+
+    void GetProcedures(std::vector<proc_info_t>& out){
+        {
+            auto i = m_p0->m_funcs.begin();
+            while(i != m_p0->m_funcs.end()){
+                if(i->second.s == DSC_PUBLIC){
+                    DISPID id = DISPID_UNKNOWN;
+                    LPOLESTR lpName = (LPOLESTR)i->second.p->m_name.c_str();
+                    if(SUCCEEDED(this->GetIDsOfNames(IID_NULL, &lpName, 1, 0, &id))){
+                        out.push_back({ i->second.p->m_name, id, (UINT)i->second.p->m_params.size(), !i->second.p->m_is_sub });
+                    }
+                }
+                ++i;
+            }
+        }
+        {
+            auto i = m_exec.front().begin();
+            while(i != m_exec.front().end()){
+                auto j = (*i)->m_p0->m_funcs.begin();
+                while(j != (*i)->m_p0->m_funcs.end()){
+                    if(j->second.s == DSC_PUBLIC){
+                        DISPID id = DISPID_UNKNOWN;
+                        LPOLESTR lpName = (LPOLESTR)j->second.p->m_name.c_str();
+                        if(SUCCEEDED(this->GetIDsOfNames(IID_NULL, &lpName, 1, 0, &id))){
+                            out.push_back({ j->second.p->m_name, id, (UINT)j->second.p->m_params.size(), !j->second.p->m_is_sub });
+                        }
+                    }
+                    ++j;
+                }
+                ++i;
+            }
+        }
     }
 };
 

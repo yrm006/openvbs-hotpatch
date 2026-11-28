@@ -3037,7 +3037,10 @@ SCODE ToScriptSCode(const Error* err){
 
 
 
-class OBModule : public IDispatch{
+class OBModule :
+    public IDispatch,
+    public ITypeInfo,
+    public ITypeComp{
 private:
     volatile LONG       m_refc   = 1;
 
@@ -3074,6 +3077,12 @@ public:
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject){
         if(!ppvObject) return E_POINTER;
 
+		if(::IsEqualGUID(riid, IID_ITypeInfo)){
+			*ppvObject = (ITypeInfo*)this;
+		}else
+		if(::IsEqualGUID(riid, IID_ITypeComp)){
+			*ppvObject = (ITypeComp*)this;
+		}else
 		if(::IsEqualGUID(riid, IID_IUnknown)){
 			*ppvObject = (IDispatch*)this;
 		}else
@@ -3089,8 +3098,18 @@ public:
     ULONG STDMETHODCALLTYPE AddRef(){ return InterlockedIncrement(&m_refc); }
     ULONG STDMETHODCALLTYPE Release(){ LONG refc = InterlockedDecrement(&m_refc); if(!refc){ delete this; return 0; } return refc; }
 
-    HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo){ return E_NOTIMPL; }
-    HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo){
+        *pctinfo = 1;
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo){
+        if(iTInfo == 0){
+            (*ppTInfo = this)->AddRef();
+            return S_OK;
+        }
+
+        return E_INVALIDARG;
+    }
     HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId){
         if(m_sub_pPrcs){
             return m_sub_pPrcs->GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
@@ -3128,6 +3147,114 @@ public:
             return DISP_E_MEMBERNOTFOUND;
         }
     }
+
+// ITypeInfo
+    HRESULT STDMETHODCALLTYPE GetTypeAttr(TYPEATTR** ppTypeAttr){
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_sub_pPrcs) m_sub_pPrcs->GetProcedures(procs);
+
+        TYPEATTR* ta = new TYPEATTR();
+        ta->typekind = TKIND_DISPATCH;
+        ta->cFuncs = (WORD)procs.size();
+        ta->memidConstructor = MEMBERID_NIL;
+        ta->memidDestructor = MEMBERID_NIL;
+        *ppTypeAttr = ta;
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetTypeComp(ITypeComp** ppTComp){
+        *ppTComp = (ITypeComp*)this;
+        this->AddRef();
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetFuncDesc(UINT index, FUNCDESC** ppFuncDesc){
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_sub_pPrcs) m_sub_pPrcs->GetProcedures(procs);
+
+        if(procs.size() <= index) return TYPE_E_ELEMENTNOTFOUND;
+
+        FUNCDESC* fd = new FUNCDESC();{
+            fd->memid = procs[index].memid;
+            fd->funckind = FUNC_DISPATCH;
+            fd->invkind = INVOKE_FUNC;
+            fd->callconv = CC_STDCALL;
+            fd->cParams = (SHORT)procs[index].numArgs;
+            fd->cParamsOpt = 0;
+            fd->elemdescFunc.tdesc.vt = procs[index].hasReturn ? VT_VARIANT : VT_VOID;
+        }
+
+        *ppFuncDesc = fd;
+
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetVarDesc(UINT, VARDESC**){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetNames(MEMBERID memid, BSTR* rgBstrNames, UINT cMaxNames, UINT* pcNames){
+        *pcNames = 0;
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_sub_pPrcs) m_sub_pPrcs->GetProcedures(procs);
+
+        auto i = procs.begin();
+        while(i != procs.end()){
+            if(i->memid == memid){
+                if(1 <= cMaxNames){
+                    rgBstrNames[0] = SysAllocString(i->name.c_str());
+                    *pcNames = 1;
+                }
+                return S_OK;
+            }
+            ++i;
+        }
+        return TYPE_E_ELEMENTNOTFOUND;
+    }
+    HRESULT STDMETHODCALLTYPE GetRefTypeOfImplType(UINT, HREFTYPE*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetImplTypeFlags(UINT, INT*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetIDsOfNames(LPOLESTR*, UINT, MEMBERID*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE Invoke(PVOID, MEMBERID, WORD, DISPPARAMS*, VARIANT*, EXCEPINFO*, UINT*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetDocumentation(MEMBERID, BSTR*, BSTR*, DWORD*, BSTR*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetDllEntry(MEMBERID, INVOKEKIND, BSTR*, BSTR*, WORD*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetRefTypeInfo(HREFTYPE, ITypeInfo**){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE AddressOfMember(MEMBERID, INVOKEKIND, PVOID*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown*, REFIID, PVOID*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetMops(MEMBERID, BSTR*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetContainingTypeLib(ITypeLib**, UINT*){ return E_NOTIMPL; }
+    void STDMETHODCALLTYPE ReleaseTypeAttr(TYPEATTR* pTypeAttr){ delete pTypeAttr; }
+    void STDMETHODCALLTYPE ReleaseFuncDesc(FUNCDESC* pFuncDesc){ delete pFuncDesc; }
+    void STDMETHODCALLTYPE ReleaseVarDesc(VARDESC*){}
+
+// ITypeComp
+    HRESULT STDMETHODCALLTYPE Bind(LPOLESTR szName, ULONG lHashVal, WORD wFlags, ITypeInfo** ppTInfo, DESCKIND* pDescKind, BINDPTR* pBindPtr){
+        if(ppTInfo)   *ppTInfo = nullptr;
+        if(pDescKind) *pDescKind = DESCKIND_NONE;
+        if(pBindPtr)  pBindPtr->lpfuncdesc = nullptr;
+        if(wFlags != 0 && !(wFlags & INVOKE_FUNC)) return S_OK;
+
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_sub_pPrcs) m_sub_pPrcs->GetProcedures(procs);
+
+        istring key(szName);
+        auto i = procs.begin();
+        while(i != procs.end()){
+            if(i->name == key){
+                if(pBindPtr){
+                    FUNCDESC* fd = new FUNCDESC();{
+                        fd->memid = i->memid;
+                        fd->funckind = FUNC_DISPATCH;
+                        fd->invkind = INVOKE_FUNC;
+                        fd->callconv = CC_STDCALL;
+                        fd->cParams = (SHORT)i->numArgs;
+                        fd->cParamsOpt = 0;
+                        fd->elemdescFunc.tdesc.vt = i->hasReturn ? VT_VARIANT : VT_VOID;
+                    }
+                    pBindPtr->lpfuncdesc = fd;
+                }
+                if(pDescKind) *pDescKind = DESCKIND_FUNCDESC;
+                if(ppTInfo){  *ppTInfo = (ITypeInfo*)this; this->AddRef(); }
+                return S_OK;
+            }
+            ++i;
+        }
+        return S_OK; // same as vbscript.dll with DESCKIND_NONE
+    }
+    HRESULT STDMETHODCALLTYPE BindType(LPOLESTR, ULONG, ITypeInfo**, ITypeComp**){ return E_NOTIMPL; }
 };
 
 
@@ -3135,7 +3262,9 @@ public:
 class OBScript : public IDispatch,
 	public IActiveScriptParse,
 	public IActiveScript,
-    public IObjectSafety{
+    public IObjectSafety,
+    public ITypeInfo,
+    public ITypeComp{
 private:
     volatile LONG       m_refc   = 1;
 
@@ -3599,6 +3728,12 @@ DEBUG("%s\n", __func__)
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject){
         if(!ppvObject) return E_POINTER;
 
+		if(::IsEqualGUID(riid, IID_ITypeInfo)){
+			*ppvObject = (ITypeInfo*)this;
+		}else
+		if(::IsEqualGUID(riid, IID_ITypeComp)){
+			*ppvObject = (ITypeComp*)this;
+		}else
 		if(::IsEqualGUID(riid, IID_IActiveScriptParse)){
 			*ppvObject = (IActiveScriptParse*)this;
 		}else
@@ -3614,9 +3749,6 @@ DEBUG("%s\n", __func__)
 		if(::IsEqualGUID(riid, IID_IDispatch)){
 			*ppvObject = (IDispatch*)this;
 		}else{
-OLECHAR buf[256];
-::StringFromGUID2(riid, buf, 256);
-DEBUG("[NOTIMPL]%ls\n", buf)
 			return E_NOINTERFACE;
 		}
 
@@ -3626,8 +3758,18 @@ DEBUG("[NOTIMPL]%ls\n", buf)
     ULONG STDMETHODCALLTYPE AddRef(){ return InterlockedIncrement(&m_refc); }
     ULONG STDMETHODCALLTYPE Release(){ LONG refc = InterlockedDecrement(&m_refc); if(!refc){ delete this; return 0; } return refc; }
 
-    HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo){ return E_NOTIMPL; }
-    HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo){
+        *pctinfo = 1;
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo){
+        if(iTInfo == 0){
+            (*ppTInfo = this)->AddRef();
+            return S_OK;
+        }
+
+        return E_INVALIDARG;
+    }
     HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId){
         if(m_pPrcs){
             return m_pPrcs->GetIDsOfNames(riid, rgszNames, cNames, lcid, rgDispId);
@@ -3665,6 +3807,114 @@ DEBUG("[NOTIMPL]%ls\n", buf)
             return DISP_E_MEMBERNOTFOUND;
         }
     }
+
+// ITypeInfo
+    HRESULT STDMETHODCALLTYPE GetTypeAttr(TYPEATTR** ppTypeAttr){
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_pPrcs) m_pPrcs->GetProcedures(procs);
+
+        TYPEATTR* ta = new TYPEATTR();
+        ta->typekind = TKIND_DISPATCH;
+        ta->cFuncs = (WORD)procs.size();
+        ta->memidConstructor = MEMBERID_NIL;
+        ta->memidDestructor = MEMBERID_NIL;
+        *ppTypeAttr = ta;
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetTypeComp(ITypeComp** ppTComp){
+        *ppTComp = (ITypeComp*)this;
+        this->AddRef();
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetFuncDesc(UINT index, FUNCDESC** ppFuncDesc){
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_pPrcs) m_pPrcs->GetProcedures(procs);
+
+        if(procs.size() <= index) return TYPE_E_ELEMENTNOTFOUND;
+
+        FUNCDESC* fd = new FUNCDESC();{
+            fd->memid = procs[index].memid;
+            fd->funckind = FUNC_DISPATCH;
+            fd->invkind = INVOKE_FUNC;
+            fd->callconv = CC_STDCALL;
+            fd->cParams = (SHORT)procs[index].numArgs;
+            fd->cParamsOpt = 0;
+            fd->elemdescFunc.tdesc.vt = procs[index].hasReturn ? VT_VARIANT : VT_VOID;
+        }
+
+        *ppFuncDesc = fd;
+
+        return S_OK;
+    }
+    HRESULT STDMETHODCALLTYPE GetVarDesc(UINT, VARDESC**){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetNames(MEMBERID memid, BSTR* rgBstrNames, UINT cMaxNames, UINT* pcNames){
+        *pcNames = 0;
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_pPrcs) m_pPrcs->GetProcedures(procs);
+
+        auto i = procs.begin();
+        while(i != procs.end()){
+            if(i->memid == memid){
+                if(1 <= cMaxNames){
+                    rgBstrNames[0] = SysAllocString(i->name.c_str());
+                    *pcNames = 1;
+                }
+                return S_OK;
+            }
+            ++i;
+        }
+        return TYPE_E_ELEMENTNOTFOUND;
+    }
+    HRESULT STDMETHODCALLTYPE GetRefTypeOfImplType(UINT, HREFTYPE*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetImplTypeFlags(UINT, INT*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetIDsOfNames(LPOLESTR*, UINT, MEMBERID*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE Invoke(PVOID, MEMBERID, WORD, DISPPARAMS*, VARIANT*, EXCEPINFO*, UINT*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetDocumentation(MEMBERID, BSTR*, BSTR*, DWORD*, BSTR*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetDllEntry(MEMBERID, INVOKEKIND, BSTR*, BSTR*, WORD*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetRefTypeInfo(HREFTYPE, ITypeInfo**){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE AddressOfMember(MEMBERID, INVOKEKIND, PVOID*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown*, REFIID, PVOID*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetMops(MEMBERID, BSTR*){ return E_NOTIMPL; }
+    HRESULT STDMETHODCALLTYPE GetContainingTypeLib(ITypeLib**, UINT*){ return E_NOTIMPL; }
+    void STDMETHODCALLTYPE ReleaseTypeAttr(TYPEATTR* pTypeAttr){ delete pTypeAttr; }
+    void STDMETHODCALLTYPE ReleaseFuncDesc(FUNCDESC* pFuncDesc){ delete pFuncDesc; }
+    void STDMETHODCALLTYPE ReleaseVarDesc(VARDESC*){}
+
+// ITypeComp
+    HRESULT STDMETHODCALLTYPE Bind(LPOLESTR szName, ULONG lHashVal, WORD wFlags, ITypeInfo** ppTInfo, DESCKIND* pDescKind, BINDPTR* pBindPtr){
+        if(ppTInfo)   *ppTInfo = nullptr;
+        if(pDescKind) *pDescKind = DESCKIND_NONE;
+        if(pBindPtr)  pBindPtr->lpfuncdesc = nullptr;
+        if(wFlags != 0 && !(wFlags & INVOKE_FUNC)) return S_OK;
+
+        std::vector<CProcessor::proc_info_t> procs;
+        if(m_pPrcs) m_pPrcs->GetProcedures(procs);
+
+        istring key(szName);
+        auto i = procs.begin();
+        while(i != procs.end()){
+            if(i->name == key){
+                if(pBindPtr){
+                    FUNCDESC* fd = new FUNCDESC();{
+                        fd->memid = i->memid;
+                        fd->funckind = FUNC_DISPATCH;
+                        fd->invkind = INVOKE_FUNC;
+                        fd->callconv = CC_STDCALL;
+                        fd->cParams = (SHORT)i->numArgs;
+                        fd->cParamsOpt = 0;
+                        fd->elemdescFunc.tdesc.vt = i->hasReturn ? VT_VARIANT : VT_VOID;
+                    }
+                    pBindPtr->lpfuncdesc = fd;
+                }
+                if(pDescKind) *pDescKind = DESCKIND_FUNCDESC;
+                if(ppTInfo){  *ppTInfo = (ITypeInfo*)this; this->AddRef(); }
+                return S_OK;
+            }
+            ++i;
+        }
+        return S_OK; // same as vbscript.dll with DESCKIND_NONE
+    }
+    HRESULT STDMETHODCALLTYPE BindType(LPOLESTR, ULONG, ITypeInfo**, ITypeComp**){ return E_NOTIMPL; }
 };
 
 
